@@ -1,0 +1,11 @@
+# dependencies
+public
+node_modules
+.idea/
+logger/
+.env
+/package-lock.json
+
+# package directories
+#node_modules
+jspm_packages
