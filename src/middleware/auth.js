@@ -9,13 +9,18 @@ const helper = require('../helper/helper');
 
 module.exports.userAuth = async (req,res,next)=>{
     try{
-        const token = req.header('Authorization').replace('Bearer ','');
-        let decode =  await jwt.verify(token, "mynameiskishan");
-        if(!decode) return helper.error(res, 400,res.__("TokenExpired"));
-        const user = await UserModel.findOne({_id: decode._id});
-        if(!user) return helper.error(res,400, res.__("UserNotFound"));
-        req.user = user;
-        await next();
+        if(req.body.isGuest === "true"){
+            await next();
+        }else{
+            const token = req.header('Authorization').replace('Bearer ','');
+            let decode =  await jwt.verify(token, "mynameiskishan");
+            if(!decode) return helper.error(res, 400,res.__("TokenExpired"));
+            const user = await UserModel.findOne({_id: decode._id});
+            if(!user) return helper.error(res,400, res.__("UserNotFound"));
+            req.user = user;
+            await next();
+        }
+
     }catch(error){
         return helper.error(res,401,res.__("invalidToken"));
     }

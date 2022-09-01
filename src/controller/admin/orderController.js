@@ -61,37 +61,16 @@ exports.editOrderAdmin = async (req,res) => {
         let reqParam = req.body;
         const date = Date.now();
         const currentDate = new Date(date);
-
+        let d = new Date();
+        let year = d.getFullYear();
+        let month = d.getMonth();
+        let day = d.getDate();
+        let expireDate = new Date(year + 1, month, day);
 
         let existingOrder = await order.findOne({_id: reqParam.orderId, status: {$ne: 3}});
         if (!existingOrder) return helper.success(res, res.__("orderNotFound"), 0, 200);
 
-        let existingUser = await userInfo.findOne({_id: existingOrder.userId});
-
         const orderTrackData = await trackOrder.findOne({orderId: reqParam.orderId});
-
-        if (existingOrder.orderStatus === "delivered") {
-            let coinLimit = 50;
-            let coinData =  (existingOrder.finalAmount * 2) / 100;
-
-            if (coinData > coinLimit) {
-                let a = existingUser.superCoin
-                let b = coinLimit
-                let c = coinData
-                let sum = a + coinLimit
-                if (existingOrder.userId) {
-                    await userInfo.updateOne({_id: existingOrder.userId},{$set: {superCoin: sum}},{new : true})
-                }
-            } else{
-                let a = existingUser.superCoin
-                let b = coinLimit
-                let c = coinData
-                let sum = a + coinData
-                if(existingOrder.userId){
-                    await userInfo.updateOne({_id: existingOrder.userId}, {$set:{superCoin: sum}}, {new: true})
-                }
-            }
-        }
 
              if(reqParam.orderStatus === "dispatched"){
                 if(existingOrder.orderStatus === "out for delivery" || existingOrder.orderStatus ==="delivered" || existingOrder.orderStatus === "cancelled"){
@@ -127,6 +106,7 @@ exports.editOrderAdmin = async (req,res) => {
                  }
                  await trackOrder.updateOne({orderId: reqParam.orderId}, {$set: {deliveredDate: currentDate, orderStatus: reqParam.orderStatus}}, {new: true})
                  await order.updateOne({_id: reqParam.orderId}, {$set: {orderStatus: reqParam.orderStatus}}, {new: true})
+
              }
 
              else if (reqParam.orderStatus === "cancelled") {
@@ -142,10 +122,49 @@ exports.editOrderAdmin = async (req,res) => {
         await orderTrackData.save();
 
         const orderTrack = await trackOrder.findOne({orderId: reqParam.orderId});
+
+        let orderDetails = await order.findOne({_id: reqParam.orderId, status: {$ne: 3}});
+        let existingUser = await userInfo.findOne({_id: orderDetails.userId,status: {$ne: 3}});
+
+
+        let coinCount = existingUser.superCoin - 200;
+
+        if (orderDetails.orderStatus === "delivered") {
+            let coinLimit = 50;
+            let coinData =  (orderDetails.finalAmount * 2) / 100;
+
+            if (coinData > coinLimit) {
+                let a = existingUser.superCoin
+                let b = coinLimit
+                let c = coinData
+                let sum = a + coinLimit
+                if (orderDetails.userId) {
+                    await userInfo.updateOne({_id: orderDetails.userId},{$set: {superCoin: sum}},{new : true})
+                }
+            } else{
+                let a = existingUser.superCoin
+                let b = coinLimit
+                let c = coinData
+                let sum = a + coinData
+                if(orderDetails.userId){
+                    await userInfo.updateOne({_id: orderDetails.userId}, {$set:{superCoin: sum}},{new: true})
+                }
+            }
+        }
+
+        if(existingUser.superCoin < 200) {
+            await userInfo.updateOne({_id: orderDetails.userId}, {$set: {userType: "regular"}}, {new: true})
+        }
+        if(existingUser.superCoin > 200) {
+            await userInfo.updateOne({_id: orderDetails.userId}, {$set: {superCoin: coinCount,userType: "prime", primeExpiryDate: expireDate}}, {new: true})
+        }
+
+
+
+
         const response = trackOrderTransformer.transformTrackOrderDetails(orderTrack);
         return helper.success(res, res.__("orderTrackedSuccessfully"), 1, 200,response)
     }catch(e){
-        console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }

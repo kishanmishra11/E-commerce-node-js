@@ -103,8 +103,8 @@ exports.createOrder = async (req,res)=>{
 exports.listOrder = async (req,res)=>{
     try{
         let reqParam = req.body;
-        const orderlist = await trackOrder.find({userId:reqParam.userId});
-        const response = orderTransformer.listTransformOrderDetails(orderlist)
+        const orderList = await order.find({userId:reqParam.userId});
+        const response = orderTransformer.listTransformOrderDetails(orderList)
         return helper.success(res,res.__("orderListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response);
     }catch(e){
         console.log(e)

@@ -31,6 +31,14 @@ const userSchema = new mongoose.Schema({
         type:Number,
         default: 0,
     },
+    userType: {
+        type: String,
+        default: "regular",
+        enum: ["regular", "prime"]
+    },
+    primeExpiryDate:{
+        type: Date,
+    },
 })
 
 
