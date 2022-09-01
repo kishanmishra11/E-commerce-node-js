@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userInfo = require('../../model/users');
-const UserTransformer = require('../../transformer/userTransformer');
+const UserTransformerAdmin = require('../../transformer/adminTransformer/userTransformer');
 const userService = require('../../service/userService/userService');
 const { editUserValidation, userValidation } = require("../../validation/adminValidation/editUserValidation");
 const helper = require("../../helper/helper");
@@ -29,7 +29,7 @@ exports.listUser = async (req,res)=>{
         const [userService2] = await userService.userService({skip: skipCount, status: reqParam.status,limit: limitCount,sortBy:reqParam.sortBy,sortKey:reqParam.sortKey,search:reqParam.search})
         const responseData = userService2 &&  userService2.data ? userService2.data : [];
         const totalCount =(userService2, userService2.totalRecords &&  userService2.totalRecords[0] &&  userService2.totalRecords[0].count);
-        const response = UserTransformer.listtransformUserDetails(responseData)
+        const response = UserTransformerAdmin.listtransformUserDetails(responseData)
         return helper.success(res,res.__("userListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response,{"totalCount":totalCount});
     }catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
@@ -74,7 +74,7 @@ exports.addEditUser = async (req,res) => {
         userExist.status = req.body.status ? reqParam.status : userExist.status;
 
         const newUser = await userExist.save();
-        const response = UserTransformer.transformUserDetails(newUser);
+        const response = UserTransformerAdmin.transformUserDetails(newUser);
         if (req.body.userId) {
             return helper.success(res,res.__("userUpdatedSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
         }else{
@@ -91,7 +91,7 @@ exports.viewUser = async (req,res) => {
         let reqParam = req.body;
         let existingUser = await userInfo.findOne({_id: reqParam.userId, status: {$ne: 3}});
         if(!existingUser) return helper.success(res, res.__("userNotFound"), META_STATUS_0, SUCCESSFUL);
-        const response = UserTransformer.transformUserDetails(existingUser);
+        const response = UserTransformerAdmin.transformUserDetails(existingUser);
         return helper.success(res,res.__("userListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));

@@ -1,6 +1,6 @@
 const express = require('express');
 const categoryUserRouter = express.Router();
-const controller = require('../../../controller/user/category/category');
+const controller = require('../../../controller/user/category/categoryController');
 const i18n = require('i18n');
 const checkAuth = require("../../../middleware/auth");
 

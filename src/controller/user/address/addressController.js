@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Address = require('../../../model/address');
-const AddressTransformer = require('../../../transformer/addressTransformer');
+const AddressTransformer = require('../../../transformer/userTransformer/addressTransformer');
 const addressService = require('../../../service/adminService/addressService');
 const { editAddressValidation, addressValidation } = require("../../../validation/userValidation/addressValidation");
 const helper = require("../../../helper/helper");

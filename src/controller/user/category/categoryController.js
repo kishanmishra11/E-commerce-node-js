@@ -1,6 +1,6 @@
-const Category = require('../../../model/category');
+const CategoryController = require('../../../model/category');
 const categoryService = require('../../../service/adminService/categoryservice');
-const transformer = require('../../../transformer/transformer');
+const categoryTransformerUser = require('../../../transformer/userTransformer/categoryTransformer');
 const helper = require("../../../helper/helper");
 const{
     META_STATUS_0 = 0,
@@ -16,7 +16,7 @@ const{
 
 
 
-//List Category
+//List CategoryController
 exports.listCategory = async (req,res)=>{
     try{
         //set language
@@ -29,7 +29,7 @@ exports.listCategory = async (req,res)=>{
         const [categoryService2] = await categoryService.categoryService({skip: skipCount, limit: limitCount,sortBy:reqParam.sortBy,sortKey:reqParam.sortKey, search:reqParam.search})
         const responseData = categoryService2 &&  categoryService2.data ? categoryService2.data : [];
         const totalCount =(categoryService2, categoryService2.totalRecords &&  categoryService2.totalRecords[0] &&  categoryService2.totalRecords[0].count);
-        const response = transformer.listtransformAddressDetails(responseData, lang)
+        const response = categoryTransformerUser.listTransformCategoryDetailsUser(responseData, lang)
         return helper.success(res,res.__("categoryListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response,{"totalCount":totalCount});
     }catch(e){
         console.log(e)
@@ -38,13 +38,13 @@ exports.listCategory = async (req,res)=>{
 }
 
 
-//view Category
+//view CategoryController
 exports.viewCategory = async (req,res) => {
     try{
         let reqParam = req.body;
-        let existingCategory = await Category.findOne({_id: reqParam.categoryId, status: {$ne: 3}});
+        let existingCategory = await CategoryController.findOne({_id: reqParam.categoryId, status: {$ne: 3}});
         if(!existingCategory) return helper.success(res, res.__("categoryNotFound"), META_STATUS_0, SUCCESSFUL);
-        const response = transformer.transformAddressDetails(existingCategory);
+        const response = categoryTransformerUser.transformCategoryDetailsUser(existingCategory);
         return helper.success(res,res.__("categoryFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));

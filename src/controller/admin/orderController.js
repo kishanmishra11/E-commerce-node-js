@@ -2,8 +2,8 @@ const jwt = require('jsonwebtoken');
 const order = require("../../model/order");
 const trackOrder = require("../../model/trackOrder");
 const userInfo = require('../../model/users');
-const orderTransformer = require("../../transformer/orderTransformer");
-const trackOrderTransformer = require("../../transformer/trackOrderTransformer");
+const orderTransformerAdmin = require("../../transformer/adminTransformer/orderTransformer");
+const trackOrderTransformerAdmin = require("../../transformer/adminTransformer/trackOrderTransformer");
 const helper = require("../../helper/helper");
 const{
     META_STATUS_0 = 0,
@@ -32,7 +32,7 @@ exports.listOrderAdmin = async (req,res)=>{
         } else {
             orderList = await order.find()
         }
-        const response = await orderTransformer.listTransformOrderDetails(orderList)
+        const response = await orderTransformerAdmin.listTransformOrderDetails(orderList)
         return helper.success(res,res.__("orderListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response);
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
@@ -47,7 +47,7 @@ exports.viewOrderAdmin = async (req,res) => {
         let reqParam = req.body;
         let existingOrder = await order.findOne({_id: reqParam.orderId, status: {$ne: 3}});
         if(!existingOrder) return helper.success(res, res.__("orderNotFound"), META_STATUS_0, SUCCESSFUL);
-        const response = orderTransformer.transformOrderDetails(existingOrder);
+        const response = orderTransformerAdmin.transformOrderDetails(existingOrder);
         return helper.success(res,res.__("orderFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
@@ -165,7 +165,7 @@ exports.editOrderAdmin = async (req,res) => {
 
 
 
-        const response = trackOrderTransformer.transformTrackOrderDetails(orderTrack);
+        const response = trackOrderTransformerAdmin.transformTrackOrderDetails(orderTrack);
         return helper.success(res, res.__("orderTrackedSuccessfully"), 1, 200,response)
     }catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));

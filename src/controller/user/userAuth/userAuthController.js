@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userInfo = require('../../../model/users');
-const UserTransformer = require('../../../transformer/userTransformer');
+const UserTransformer = require('../../../transformer/userTransformer/userTransformer');
 const { userValidation } = require("../../../validation/adminValidation/userValidation");
 const helper = require("../../../helper/helper");
 const mailer = require("../../../service/adminService/mailer");
@@ -48,7 +48,7 @@ exports.signUp =  async(req,res)=>{
         }
         let emailBody = await ejs.renderFile(path.join(__dirname,'../../views',"home.ejs"),{locals:locals})
         mailer.sendMail(req.body.email,emailBody,"welcome to ecommerce api")
-        const response = await UserTransformer.transformUserDetails(createUser)
+        const response = await UserTransformer.transformUserDetailsUser(createUser)
         return helper.success(res,res.__("userAddedSuccessfully"),META_STATUS_1,SUCCESSFUL,response);
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
@@ -99,7 +99,7 @@ exports.login = async (req, res) => {
         const token = jwt.sign(tokenData, "mynameiskishan", {expiresIn: '24h'});
 
 
-        const response = UserTransformer.transformUserDetails(existingUser)
+        const response = UserTransformer.transformUserDetailsUser(existingUser)
         return helper.success(res,res.__("signInSuccessfully"),META_STATUS_1, SUCCESSFUL,response,{"token": token})
     } catch (e) {
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));

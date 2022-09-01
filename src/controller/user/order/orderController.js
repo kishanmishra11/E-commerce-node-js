@@ -7,10 +7,10 @@ const promoCode = require('../../../model/promoCode');
 const Cart = require('../../../model/cart');
 const product = require('../../../model/product');
 const userInfo = require('../../../model/users');
-const subOrderTransformer = require('../../../transformer/subOrderTransformer');
-const subOrderCreateTransformer = require('../../../transformer/subOrderCreateTransformer');
-const orderTransformer = require("../../../transformer/orderTransformer");
-const trackOrderTransformer = require("../../../transformer/trackOrderTransformer");
+const subOrderTransformer = require('../../../transformer/userTransformer/subOrderTransformer');
+const subOrderCreateTransformer = require('../../../transformer/userTransformer/subOrderCreateTransformer');
+const orderTransformerUser = require("../../../transformer/userTransformer/orderTransformer");
+const trackOrderTransformerUser = require("../../../transformer/userTransformer/trackOrderTransformer");
 const amountService = require('../../../service/userService/amtDataService');
 const subOrderService = require('../../../service/userService/subOrderService');
 const cartlistService = require('../../../service/userService/cartservice');
@@ -62,7 +62,7 @@ exports.createOrder = async (req,res)=>{
         }
         const ordering  = new order(data);
         const createOrder = await ordering.save();
-        const orderData = orderTransformer.orderTransformCreate(createOrder);
+        const orderData = orderTransformerUser.orderTransformCreateUser(createOrder);
 
 
         const subOrder = await cartlistService.cartlistService({userId: req.user._id});
@@ -104,7 +104,7 @@ exports.listOrder = async (req,res)=>{
     try{
         let reqParam = req.body;
         const orderList = await order.find({userId:reqParam.userId});
-        const response = orderTransformer.listTransformOrderDetails(orderList)
+        const response = orderTransformerUser.listTransformOrderDetailsUser(orderList)
         return helper.success(res,res.__("orderListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response);
     }catch(e){
         console.log(e)
@@ -123,7 +123,7 @@ exports.viewOrder = async (req,res) => {
         if(!existingOrder) return helper.success(res, res.__("orderNotFound"), META_STATUS_0, SUCCESSFUL);
         const subData = await subOrderService.subOrderService({orderId:reqParam.orderId})
         // console.log(subData)
-        const response = orderTransformer.transformOrderDetails(existingOrder);
+        const response = orderTransformerUser.transformOrderDetailsUser(existingOrder);
         const subOrderData = subOrderTransformer.listTransformSubOrderDetails(subData);
         return helper.success(res,res.__("orderFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,subOrderData})
     } catch(e){
@@ -140,7 +140,7 @@ exports.trackOrder = async (req,res) => {
         let orderTrack = await trackOrder.findOne({trackOrderId: reqParam._id, status: {$ne: 3}});
         if(!orderTrack) return helper.success(res, res.__("orderNotFound"), META_STATUS_0, SUCCESSFUL);
 
-        const response = trackOrderTransformer.transformTrackOrderDetails(orderTrack);
+        const response = trackOrderTransformerUser.transformTrackOrderDetailsUser(orderTrack);
         return helper.success(res,res.__("orderTrackedSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));

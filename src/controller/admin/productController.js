@@ -1,5 +1,5 @@
 const Product = require('../../model/product');
-const productTransformer = require('../../transformer/protransformer');
+const productTransformerAdmin = require('../../transformer/adminTransformer/productTransformer');
 const productService = require('../../service/adminService/productservice');
 const { editProductValidation, productValidation  } = require("../../validation/adminValidation/editProductValidation");
 const helper = require("../../helper/helper");
@@ -29,7 +29,7 @@ exports.listProduct = async (req,res)=>{
         const [productService2] = await productService.productlistService({skip: skipCount, limit: limitCount,sortBy:reqParam.sortBy,sortKey:reqParam.sortKey,search:reqParam.search,status: reqParam.status})
         const responseData = productService2 &&  productService2.data ? productService2.data : [];
         const totalCount =(productService2, productService2.totalRecords &&  productService2.totalRecords[0] &&  productService2.totalRecords[0].count);
-        const response = productTransformer.productlisttransformAddressDetails(responseData,lang)
+        const response = productTransformerAdmin.productlisttransformAddressDetails(responseData,lang)
         return helper.success(res,res.__("productListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response,{"totalCount":totalCount});
     }catch(e){
         console.log(e)
@@ -74,7 +74,7 @@ exports.addEditProduct = async (req,res) => {
         await productExist.save();
         let discount = {discountedPrice : req.body.productPrice - (req.body.productPrice * req.body.productDiscount/100)};
         let productExist2 = Object.assign(productExist,discount);
-        const response = productTransformer.producttransformAddressDetails(productExist2);
+        const response = productTransformerAdmin.producttransformAddressDetails(productExist2);
         console.log(response);
         if (req.body.productId) {
             return helper.success(res,res.__("productUpdatedSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
@@ -92,7 +92,7 @@ exports.viewProduct = async (req,res) => {
         let reqParam = req.body;
         let existingProduct = await Product.findOne({_id: reqParam.productId, status: {$ne: 3}});
         if(!existingProduct) return helper.success(res, res.__("productNotFound"), META_STATUS_0, SUCCESSFUL);
-        const response = productTransformer.producttransformAddressDetails(existingProduct);
+        const response = productTransformerAdmin.producttransformAddressDetails(existingProduct);
         return helper.success(res,res.__("productFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));

@@ -2,10 +2,10 @@ const jwt = require('jsonwebtoken');
 const Cart = require("../../../model/cart");
 const applyPromoCode = require('../../../model/applyPromoCode');
 const promoCode = require('../../../model/promoCode');
-const CartTransformer = require('../../../transformer/cartTransformer');
+const CartTransformer = require('../../../transformer/userTransformer/cartTransformer');
 const cartlistService = require('../../../service/userService/cartservice');
 const { cartValidation } = require("../../../validation/userValidation/cartValidation");
-const transformAmtData = require("../../../transformer/amtDataTransformer");
+const transformAmtData = require("../../../transformer/userTransformer/amtDataTransformer");
 const amountService = require('../../../service/userService/amtDataService');
 const helper = require("../../../helper/helper");
 const{

@@ -106,7 +106,7 @@
 	"orderAlreadyOutForDelivery": "order Already Out For Delivery",
 	"orderAlreadyDelivered": "order Already Delivered",
 	"orderAlreadyCancelled": "order Already Cancelled",
-	"youCanNotCancelOrder": "youCanNotCancelOrder",
-	"dataNotFound": "dataNotFound",
-	"deliveryChargeUpdatedSuccessfully": "deliveryChargeUpdatedSuccessfully"
+	"youCanNotCancelOrder": "you Can Not Cancel Order",
+	"dataNotFound": "data Not Found",
+	"deliveryChargeUpdatedSuccessfully": "delivery Charge Updated Successfully"
 }

@@ -1,5 +1,5 @@
 const Category = require('../../model/category');
-const transformer = require('../../transformer/transformer');
+const categoryTransformerAdmin = require('../../transformer/adminTransformer/categoryTransformer');
 const categoryService = require('../../service/adminService/categoryservice');
 const {editCategoryValidation , categoryValidation}  = require("../../validation/adminValidation/editCategoryValidation");
 const helper = require("../../helper/helper");
@@ -56,7 +56,7 @@ exports.listCategory = async (req,res)=>{
         const [categoryService2] = await categoryService.categoryService({skip: skipCount, limit: limitCount,sortBy:reqParam.sortBy,sortKey:reqParam.sortKey, search:reqParam.search})
         const responseData = categoryService2 &&  categoryService2.data ? categoryService2.data : [];
         const totalCount =(categoryService2, categoryService2.totalRecords &&  categoryService2.totalRecords[0] &&  categoryService2.totalRecords[0].count);
-        const response = transformer.listtransformAddressDetails(responseData, lang)
+        const response = categoryTransformerAdmin.listtransformAddressDetails(responseData, lang)
         return helper.success(res,res.__("categoryListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response,{"totalCount":totalCount});
     }catch(e){
         console.log(e)
@@ -126,7 +126,7 @@ exports.addEditCategory = async (req,res) => {
         categoryExist.status = req.body.status ? reqParam.status : categoryExist.status;
 
         const newCategory = await categoryExist.save();
-        const response = transformer.transformAddressDetails(newCategory);
+        const response = categoryTransformerAdmin.transformAddressDetails(newCategory);
 
         if (req.body.categoryId) {
             return helper.success(res,res.__("categoryUpdatedSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
@@ -145,7 +145,7 @@ exports.viewCategory = async (req,res) => {
         let reqParam = req.body;
         let existingCategory = await Category.findOne({_id: reqParam.categoryId, status: {$ne: 3}});
         if(!existingCategory) return helper.success(res, res.__("categoryNotFound"), META_STATUS_0, SUCCESSFUL);
-        const response = transformer.transformAddressDetails(existingCategory);
+        const response = categoryTransformerAdmin.transformAddressDetails(existingCategory);
         return helper.success(res,res.__("categoryFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));

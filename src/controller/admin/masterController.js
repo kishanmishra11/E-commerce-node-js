@@ -1,6 +1,6 @@
 const config = require("../../model/config");
 const helper = require("../../helper/helper");
-const deliveryChargeTransformer = require("../../transformer/deliveryChargeTransformer");
+const deliveryChargeTransformer = require("../../transformer/adminTransformer/deliveryChargeTransformer");
 const{
     META_STATUS_0 = 0,
     META_STATUS_1 = 1,

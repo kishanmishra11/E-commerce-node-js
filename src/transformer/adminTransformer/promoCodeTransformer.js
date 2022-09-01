@@ -1,4 +1,4 @@
-const helper = require('../helper/helper');
+const helper = require('../../helper/helper');
 
 exports.transformPromoCode = (data, language) => {
     if (language == "guj") {

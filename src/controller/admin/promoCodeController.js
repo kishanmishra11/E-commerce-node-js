@@ -1,5 +1,5 @@
 const promoCode = require('../../model/promoCode');
-const promoCodeTransformer = require('../../transformer/promoCodeTransformer');
+const promoCodeTransformer = require('../../transformer/adminTransformer/promoCodeTransformer');
 const { editPromoValidation, promoCodeValidation  } = require("../../validation/adminValidation/promoCodeValidation");
 const helper = require("../../helper/helper");
 const {deleteValidation, deletePromoCodeValidation} = require("../../validation/adminValidation/deletePromoCodeValidation");

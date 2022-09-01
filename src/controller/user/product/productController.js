@@ -1,5 +1,5 @@
 const ProductController = require('../../../model/product');
-const productTransformer = require('../../../transformer/protransformer');
+const productTransformerUser = require('../../../transformer/userTransformer/productTransformer');
 const productlistService = require('../../../service/userService/productservice');
 const listProductService = require('../../../service/userService/listProductService');
 const helper = require("../../../helper/helper");
@@ -24,7 +24,7 @@ exports.listProduct = async (req,res)=>{
     try{
         let reqParam = req.body;
         const responseData = await listProductService.productlistService({userId: req.user._id});
-        const response = productTransformer.productlisttransformAddressDetails(responseData)
+        const response = productTransformerUser.productListTransformDetailsUser(responseData)
         return helper.success(res,res.__("productListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response);
     }catch(e){
         console.log(e)
@@ -43,7 +43,7 @@ exports.viewProduct = async (req,res) => {
         let existingProduct = await ProductController.findOne({_id: reqParam.productId, status: {$ne: 3}});
         if(!existingProduct) return helper.success(res, res.__("productNotFound"), META_STATUS_0, SUCCESSFUL);
         const product = await productlistService.productListService({productId:reqParam.productId});
-        const response = productTransformer.producttransformAddressDetails(existingProduct,product);
+        const response = productTransformerUser.productTransformDetailsUser(existingProduct,product);
         return helper.success(res,res.__("productFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
     } catch(e){
         console.log(e)

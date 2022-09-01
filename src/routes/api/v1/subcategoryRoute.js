@@ -1,6 +1,6 @@
 const express = require('express');
 const subCategoryUserRouter = express.Router();
-const controller = require('../../../controller/user/subCategory/subCategory');
+const controller = require('../../../controller/user/subCategory/subCategoryController');
 const i18n = require('i18n');
 const checkAuth = require("../../../middleware/auth");
 

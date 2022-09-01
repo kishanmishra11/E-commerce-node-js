@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const adminInfo = require("../../model/admin");
-const AdminTransformer = require('../../transformer/adminTransformer');
+const AdminTransformer = require('../../transformer/adminTransformer/adminTransformer');
 const { adminValidation } = require("../../validation/adminValidation/adminValidation");
 
 const helper = require("../../helper/helper");

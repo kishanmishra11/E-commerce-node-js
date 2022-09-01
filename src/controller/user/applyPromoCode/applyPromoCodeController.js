@@ -1,8 +1,8 @@
 const applyPromoCode = require('../../../model/applyPromoCode');
 const promoCode = require('../../../model/promoCode');
 const amountService = require('../../../service/userService/amtDataService');
-const transformAmtData = require("../../../transformer/amtDataTransformer");
-const applyPromoCodeTransformer = require('../../../transformer/applyPromoCodeTransformer');
+const transformAmtData = require("../../../transformer/userTransformer/amtDataTransformer");
+const applyPromoCodeTransformer = require('../../../transformer/userTransformer/applyPromoCodeTransformer');
 const helper = require("../../../helper/helper");
 
 const{
