@@ -52,6 +52,11 @@ app.use("/admin/promoCode",promoCodeRouter);
 const orderAdminRouter = require('../../api2/src/routes/admin/orderRoute');
 app.use("/admin/order",orderAdminRouter);
 
+
+const deliveryChargeRouter = require('../../api2/src/routes/admin/deliveryChargeRoute');
+app.use("/admin/deliveryCharge",deliveryChargeRouter);
+
+
 const cartRouter = require('../../api2/src/routes/api/v1/cartRoute');
 app.use("/api/v1/cart",cartRouter);
 

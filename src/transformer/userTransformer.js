@@ -7,6 +7,9 @@ exports.transformUser = (data) => {
         phone: data?.phone ? data.phone : "",
         email: data?.email ? data.email : "",
         profilePicture: data?.profilePicture ? helper.urlInfo(data.profilePicture,'user'):"",
+        superCoin: data?.superCoin ? data.superCoin : 0,
+        userType: data?.userType ? data.userType : "",
+        primeExpiryDate: data?.primeExpiryDate ? data.primeExpiryDate : 0,
         status: data?.status ? data.status : 0
     };
 };

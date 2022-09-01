@@ -61,7 +61,28 @@ exports.login = async (req, res) => {
         //set language
         const lang = req.header('language')
         if(lang) {req.setLocale(lang)}
+
         const existingUser = await userInfo.findOne({email: req.body.email});
+
+        let reqParam = req.body;
+        let d = new Date();
+        let year = d.getFullYear();
+        let month = d.getMonth();
+        let day = d.getDate();
+        let currentDate = new Date(year , month, day);
+        let expireDate = new Date(year + 1, month, day);
+        let coinCount = existingUser.superCoin - 200;
+
+        if(existingUser.userType === "prime"){
+            if(existingUser.primeExpiryDate <= currentDate){
+                await userInfo.findOneAndUpdate({email: reqParam.email}, {$set: {userType: "regular"}}, {new: true})
+            }
+        }else{
+            if(existingUser.superCoin > 200){
+                await userInfo.findOneAndUpdate({email: reqParam.email}, {$set: {superCoin: coinCount,userType: "prime", primeExpiryDate: expireDate}}, {new: true})
+            }
+        }
+
         if (!existingUser) {
             return helper.error(res,VALIDATION_ERROR,res.__("pleaseEnterCorrectEmailAndPassword"))
         }
@@ -69,12 +90,15 @@ exports.login = async (req, res) => {
         if (!validPassword) {
             return helper.error(res,VALIDATION_ERROR, res.__("pleaseEnterCorrectEmailAndPassword"))
         }
+
         const tokenData = {
             _id: existingUser._id,
             userName: existingUser.userName,
             email: existingUser.email,
         }
         const token = jwt.sign(tokenData, "mynameiskishan", {expiresIn: '24h'});
+
+
         const response = UserTransformer.transformUserDetails(existingUser)
         return helper.success(res,res.__("signInSuccessfully"),META_STATUS_1, SUCCESSFUL,response,{"token": token})
     } catch (e) {
