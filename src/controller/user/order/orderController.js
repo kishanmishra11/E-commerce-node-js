@@ -5,6 +5,7 @@ const subOrderModel = require("../../../model/subOrder");
 const applyPromoCode = require('../../../model/applyPromoCode');
 const promoCode = require('../../../model/promoCode');
 const Cart = require('../../../model/cart');
+const deliveryCharge = require('../../../model/config');
 const product = require('../../../model/product');
 const userInfo = require('../../../model/users');
 const subOrderTransformer = require('../../../transformer/userTransformer/subOrderTransformer');
@@ -49,13 +50,15 @@ exports.createOrder = async (req,res)=>{
             const usedPromoCheck =  await applyPromoCode.updateOne({userId: req.user._id, status: {$ne: 3}},{$set:{status:DELETED}});
 
         } else promoDiscount = 0
-        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id,promoDiscount: promoDiscount});
+        let delivery = await deliveryCharge.findOne()
+        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id,promoDiscount: promoDiscount,deliveryCharge:delivery.deliveryCharge});
 
         let data={
             userId: req.user._id,
             subTotal : amtDataServiceData[0].subTotal,
             productDiscount:amtDataServiceData[0].discount,
             promoDiscount:amtDataServiceData[0].promoDiscount,
+            deliveryCharge:amtDataServiceData[0].deliveryCharge,
             finalAmount:amtDataServiceData[0].finalAmount,
             promoCodeId: verifyUser?.promoCodeId ? verifyUser.promoCodeId : null,
             addressId:reqParam.addressId

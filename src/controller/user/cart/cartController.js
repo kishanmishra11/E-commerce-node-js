@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken');
 const Cart = require("../../../model/cart");
 const applyPromoCode = require('../../../model/applyPromoCode');
 const promoCode = require('../../../model/promoCode');
+const userInfo = require('../../../model/users');
+const deliveryCharge = require('../../../model/config');
 const CartTransformer = require('../../../transformer/userTransformer/cartTransformer');
 const cartlistService = require('../../../service/userService/cartservice');
 const { cartValidation } = require("../../../validation/userValidation/cartValidation");
@@ -45,11 +47,17 @@ exports.createCart =  async(req,res)=>{
             const cart = new Cart(req.body);
             update = await cart.save();
         }
+
+        // let checkUser = await userInfo.findOne({_id:update.userId})
+        // console.if(checkUser.userType === "prime")
+        // let delivery = await deliveryCharge.findOne()
+
         const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id, promoDiscount: promoDiscount});
         const response = CartTransformer.transformCartDetails(update);
         const amountData = transformAmtData.listAmtDataDetails(amtDataServiceData);
         return helper.success(res,res.__("cartAddedSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,amountData})
     } catch(e){
+        console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }
@@ -73,7 +81,6 @@ exports.listCart = async (req,res)=>{
         const amountData = transformAmtData.listAmtDataDetails(amtDataServiceData);
         return helper.success(res,res.__("cartListedSuccessfully"),META_STATUS_1,SUCCESSFUL,{cartData,amountData})
     }catch(e){
-        console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }

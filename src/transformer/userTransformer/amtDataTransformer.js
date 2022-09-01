@@ -3,6 +3,7 @@ exports.transformAmtData = (data) => {
         subTotal: data?.subTotal ? data.subTotal:0,
         discount: data?.discount ? data.discount:0,
         promoDiscount:data?.promoDiscount ? data.promoDiscount:0,
+        deliveryCharge:data?.deliveryCharge ? data.deliveryCharge:0,
         finalAmount: data?.finalAmount ? data.finalAmount:0,
     };
 };

@@ -1,4 +1,4 @@
-const helper = require('../helper/helper');
+const helper = require('../../helper/helper');
 exports.producttransformaddress = (data,language) => {
     if (language == "guj") {
         data.categoryName = data.categoryNameGuj

@@ -1,5 +1,5 @@
 const SubCategory = require('../../model/subcategory');
-const subCategoryTransformerAdmin = require('../../transformer/adminTransformer/subcategoryTransformer');
+const subCategoryTransformerAdmin = require('../../transformer/adminTransformer/subCategoryTransformer');
 const subCategoryService = require('../../service/adminService/subcatservice');
 const { editSubCategoryValidation, subCategoryValidation } = require("../../validation/adminValidation/editSubCategoryValidation");
 const helper = require("../../helper/helper");
