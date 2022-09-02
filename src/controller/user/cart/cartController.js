@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const Cart = require("../../../model/cart");
 const applyPromoCode = require('../../../model/applyPromoCode');
 const promoCode = require('../../../model/promoCode');
-const userInfo = require('../../../model/users');
 const deliveryCharge = require('../../../model/config');
 const CartTransformer = require('../../../transformer/userTransformer/cartTransformer');
 const cartlistService = require('../../../service/userService/cartservice');
@@ -31,6 +30,12 @@ exports.createCart =  async(req,res)=>{
         if(validationMessage) {
             return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
         }
+
+        let charge = await deliveryCharge.findOne({userId: req.user._id });
+        if (req.user.userType === "prime"){
+            charge.deliveryCharge = 0
+        }
+
         const verifyUser = await applyPromoCode.findOne({userId: req.user._id });
         let verifyPromo, promoDiscount;
         if(verifyUser) {
@@ -48,16 +53,11 @@ exports.createCart =  async(req,res)=>{
             update = await cart.save();
         }
 
-        // let checkUser = await userInfo.findOne({_id:update.userId})
-        // console.if(checkUser.userType === "prime")
-        // let delivery = await deliveryCharge.findOne()
-
-        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id, promoDiscount: promoDiscount});
+        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id, promoDiscount: promoDiscount,productId: req.body.productId , deliveryCharge:charge.deliveryCharge});
         const response = CartTransformer.transformCartDetails(update);
         const amountData = transformAmtData.listAmtDataDetails(amtDataServiceData);
         return helper.success(res,res.__("cartAddedSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,amountData})
     } catch(e){
-        console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }
@@ -81,6 +81,7 @@ exports.listCart = async (req,res)=>{
         const amountData = transformAmtData.listAmtDataDetails(amtDataServiceData);
         return helper.success(res,res.__("cartListedSuccessfully"),META_STATUS_1,SUCCESSFUL,{cartData,amountData})
     }catch(e){
+        console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }

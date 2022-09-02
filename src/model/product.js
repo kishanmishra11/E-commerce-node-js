@@ -16,11 +16,11 @@ const productSchema = new mongoose.Schema({
     productPrice : {
         type: Number,
     },
-    productDiscount : {
+    regularDiscount : {
         type: Number,
     },
-    discountedPrice : {
-        type: Number,
+    primeDiscount:{
+      type:Number,
     },
     productDescription : {
         type: String,

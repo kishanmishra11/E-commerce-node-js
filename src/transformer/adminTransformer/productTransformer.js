@@ -19,8 +19,10 @@ exports.producttransformaddress = (data,language) => {
         productName: data?.productName ? data.productName: "",
         productDescription: data?.productDescription ? data.productDescription : "",
         productPrice: data?.productPrice ? data.productPrice: "",
-        productDiscount: data?.productDiscount ? data.productDiscount: "",
-        discountedPrice: data?.discountedPrice ? data.discountedPrice: 0,
+        regularDiscount: data?.regularDiscount ? data.regularDiscount: 0,
+        primeDiscount: data?.primeDiscount ? data.primeDiscount: 0,
+        regularDiscountedPrice: data?.regularDiscountedPrice ? data.regularDiscountedPrice: 0,
+        primeDiscountedPrice: data?.primeDiscountedPrice ? data.primeDiscountedPrice: 0,
         productImage: data?.productImage ? helper.urlInfo(data.productImage,'user'):"",
         status: data?.status ? data.status : 0,
         cartQuantity:  data?.cartQuantity ? data.cartQuantity : 0,
@@ -34,8 +36,10 @@ exports.producttransformCreate = (data) => {
         subCategoryId: data?.subCategoryId ? data.subCategoryId: "",
         productName: data?.productName ? data.productName: "",
         productPrice: data?.productPrice ? data.productPrice: "",
-        productDiscount: data?.productDiscount ? data.productDiscount: "",
-        discountedPrice: data?.discountedPrice ? data.discountedPrice: 0,
+        regularDiscount: data?.regularDiscount ? data.regularDiscount: 0,
+        primeDiscount: data?.primeDiscount ? data.primeDiscount: 0,
+        regularDiscountedPrice: data?.regularDiscountedPrice ? data.regularDiscountedPrice: 0,
+        primeDiscountedPrice: data?.primeDiscountedPrice ? data.primeDiscountedPrice: 0,
         productDescription: data?.productDescription ? data.productDescription : "",
         productImage: data?.productImage ? helper.urlInfo(data.productImage,'user'):"",
         status: data?.status ? data.status : 0
@@ -46,10 +50,10 @@ exports.producttransformCreate = (data) => {
 
 exports.producttransformAddressDetails = (arrayData,arrayData2) => {
     let addressData = null;
-    if (arrayData,arrayData2) {
+    if (arrayData) {
         addressData = this.producttransformCreate(arrayData,arrayData2);
     }
-    return arrayData,arrayData2;
+    return addressData;
 };
 
 exports.productlisttransformAddressDetails = (arrayData,language) => {

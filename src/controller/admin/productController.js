@@ -1,4 +1,5 @@
 const Product = require('../../model/product');
+const userInfo = require('../../model/users');
 const productTransformerAdmin = require('../../transformer/adminTransformer/productTransformer');
 const productService = require('../../service/adminService/productservice');
 const { editProductValidation, productValidation  } = require("../../validation/adminValidation/editProductValidation");
@@ -46,18 +47,25 @@ exports.addEditProduct = async (req,res) => {
         //joi validation
         let reqParam = req.body;
         let productExist
+
+        // let user = await userInfo.findOne({userId:reqParam._id})
+        // console.log(user)
         if(reqParam.productId){
-            if(req.file && req.file.filename) reqParam.productImage = req.file.filename;
+            if(req.file && req.file.filename) {reqParam.productImage = req.file.filename};
             const validationMessage  = await editProductValidation(reqParam);
             if(validationMessage) return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
+
             productExist = await Product.findOne({_id: reqParam.productId, status: {$ne: 3}});
             if(!productExist) return helper.success(res, res.__("productNotFound"), META_STATUS_0, SUCCESSFUL);
+
         } else  {
             if(req.file && req.file.filename) reqParam.productImage = req.file.filename;
             const validationMessage  = await productValidation(reqParam);
             if(validationMessage) return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
-            productExist = await Product.findOne({_id: reqParam.productId, status: {$ne: 3}});
+
+            productExist = await Product.findOne({productName: reqParam.productName, status: {$ne: 3}});
             if(productExist) return helper.success(res, res.__("productAlreadyExists"), META_STATUS_0, SUCCESSFUL);
+
             productExist = new Product();
         }
         productExist.categoryId = req.body.categoryId ? reqParam.categoryId : productExist.categoryId;
@@ -65,26 +73,35 @@ exports.addEditProduct = async (req,res) => {
         productExist.productName = req.body.productName ? reqParam.productName : productExist.productName;
         productExist.productNameGuj = req.body.productNameGuj ? reqParam.productNameGuj : productExist.productNameGuj;
         productExist.productPrice = req.body.productPrice ? reqParam.productPrice : productExist.productPrice;
-        productExist.productDiscount = req.body.productDiscount ? reqParam.productDiscount : productExist.productDiscount;
-        productExist.discountedPrice = req.body.discountedPrice ? reqParam.discountedPrice : productExist.discountedPrice;
+        productExist.regularDiscount = req.body.regularDiscount ? reqParam.regularDiscount : productExist.regularDiscount;
+        productExist.primeDiscount = req.body.primeDiscount ? reqParam.primeDiscount : productExist.primeDiscount;
         productExist.productDescription = req.body.productDescription ? reqParam.productDescription : productExist.productDescription;
         productExist.productDescriptionGuj = req.body.productDescriptionGuj ? reqParam.productDescriptionGuj : productExist.productDescriptionGuj;
         productExist.productImage = req.body.productImage ? reqParam.productImage : productExist.productImage;
         productExist.status = req.body.status ? reqParam.status : productExist.status;
+
         await productExist.save();
-        let discount = {discountedPrice : req.body.productPrice - (req.body.productPrice * req.body.productDiscount/100)};
-        let productExist2 = Object.assign(productExist,discount);
+        // console.log(productExist)
+        // let discount = {discountedPrice : req.body.productPrice - (req.body.productPrice * (req.body.regularDiscount + req.body.primeDiscount) /100)};
+        let regularDiscount ={regularDiscountedPrice : productExist.productPrice -((productExist.productPrice * productExist.regularDiscount)/100)}
+        console.log(regularDiscount)
+        let primeDiscount = {primeDiscountedPrice : productExist.productPrice -((productExist.productPrice * (productExist.regularDiscount + productExist.primeDiscount))/100)}
+        console.log(primeDiscount)
+
+        let productExist2 = Object.assign(productExist,regularDiscount,primeDiscount);
         const response = productTransformerAdmin.producttransformAddressDetails(productExist2);
-        console.log(response);
         if (req.body.productId) {
             return helper.success(res,res.__("productUpdatedSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
         }else{
             return helper.success(res,res.__("productAddedSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
         }
     } catch(e){
+        console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }
+
+
 
 //view Product
 exports.viewProduct = async (req,res) => {
@@ -92,7 +109,11 @@ exports.viewProduct = async (req,res) => {
         let reqParam = req.body;
         let existingProduct = await Product.findOne({_id: reqParam.productId, status: {$ne: 3}});
         if(!existingProduct) return helper.success(res, res.__("productNotFound"), META_STATUS_0, SUCCESSFUL);
-        const response = productTransformerAdmin.producttransformAddressDetails(existingProduct);
+
+        let regularDiscount ={regularDiscountedPrice : existingProduct.productPrice -((existingProduct.productPrice * existingProduct.regularDiscount)/100)}
+        let primeDiscount = {primeDiscountedPrice : existingProduct.productPrice -((existingProduct.productPrice * (existingProduct.regularDiscount + existingProduct.primeDiscount))/100)}
+        let productExist = Object.assign(existingProduct,regularDiscount,primeDiscount);
+        const response = productTransformerAdmin.producttransformAddressDetails(productExist);
         return helper.success(res,res.__("productFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));

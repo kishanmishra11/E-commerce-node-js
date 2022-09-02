@@ -6,9 +6,9 @@ const checkAuth = require("../../../middleware/auth");
 
 
 
-categoryUserRouter.post("/list-category",controller.listCategory);
+categoryUserRouter.post("/list-category",checkAuth.userAuth,controller.listCategory);
 
-categoryUserRouter.post("/view-category",controller.viewCategory);
+categoryUserRouter.post("/view-category",checkAuth.userAuth,controller.viewCategory);
 
 
 module.exports = categoryUserRouter;

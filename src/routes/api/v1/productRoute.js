@@ -8,7 +8,7 @@ const checkAuth = require("../../../middleware/auth");
 
 productUserRouter.post("/list-product",checkAuth.userAuth,controller.listProduct);
 
-productUserRouter.post("/view-product",controller.viewProduct);
+productUserRouter.post("/view-product",checkAuth.userAuth,controller.viewProduct);
 
 
 module.exports = productUserRouter;

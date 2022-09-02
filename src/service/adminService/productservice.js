@@ -57,8 +57,11 @@ exports.productlistService= async (data) => {
                     productName:1,
                     productNameGuj:1,
                     productPrice:1,
-                    productDiscount:1,
-                    discountedPrice:{ $subtract: ["$productPrice",{$divide:[({$multiply:["$productPrice", "$productDiscount"]}), 100]}] },
+                    regularDiscount:1,
+                    primeDiscount:1,
+                    totalDiscount: {$sum:["$regularDiscount", "$primeDiscount"]},
+                    regularDiscountedPrice:{ $subtract: ["$productPrice",{$divide:[({$multiply:["$productPrice", "$regularDiscount"]}), 100]}] },
+                    primeDiscountedPrice:{ $subtract: ["$productPrice",{$divide:[({$multiply:["$productPrice", "$totalDiscount"]}), 100]}] },
                     productDescription:1,
                     productDescriptionGuj:1,
                     productImage:1,
@@ -93,6 +96,7 @@ exports.productlistService= async (data) => {
         );
 
         const result = await product.aggregate(pipeline);
+        console.log(result)
 
         return result;
     }catch (e) {

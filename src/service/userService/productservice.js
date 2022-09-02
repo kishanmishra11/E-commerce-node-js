@@ -9,7 +9,7 @@ exports.productListService= async (data) => {
             {
                 $match: {
                     status: {$ne: 3},
-                    _id: ObjectId(data.productId)
+                    _id: ObjectId(data.productId),
                 }
             },
 
@@ -40,6 +40,7 @@ exports.productListService= async (data) => {
             },
 
 
+
             {
                 $project: {
                     cartQuantity:{ $arrayElemAt: [ "$cartData.cartQuantity", 0] },
@@ -57,15 +58,36 @@ exports.productListService= async (data) => {
                     productName:1,
                     productNameGuj:1,
                     productPrice:1,
-                    productDiscount:1,
-                    discountedPrice: { $subtract: ["$productPrice",{$divide:[({$multiply:["$productPrice", "$productDiscount"]}), 100]}] },
+                    regularDiscount:1,
+                    primeDiscount:1,
                     productDescription:1,
                     productDescriptionGuj:1,
                     productImage:1,
                     status:1
                 }
             },
+
         );
+        if(data.userType === "prime"){
+            pipeline.push(
+                {
+                    $addFields:{
+                        productDiscount:{ $sum:["$regularDiscount", "$primeDiscount"] },
+                        discountedPrice:{ $subtract: ["$productPrice",{$divide:[({$multiply:["$productPrice", { $sum:["$regularDiscount", "$primeDiscount"] }]}), 100]}] },
+                    }
+                }
+            )
+        }else{
+            pipeline.push(
+                {
+                    $addFields:{
+                        productDiscount: "$regularDiscount",
+                        discountedPrice:{ $subtract: ["$productPrice",{$divide:[({$multiply:["$productPrice", "$regularDiscount"]}), 100]}] },
+                    }
+                }
+            )
+
+        }
 
 
         const result = await product.aggregate(pipeline);
