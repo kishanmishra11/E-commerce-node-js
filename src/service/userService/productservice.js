@@ -39,8 +39,6 @@ exports.productListService= async (data) => {
                 }
             },
 
-
-
             {
                 $project: {
                     cartQuantity:{ $arrayElemAt: [ "$cartData.cartQuantity", 0] },

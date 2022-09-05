@@ -1,4 +1,5 @@
 const ProductController = require('../../../model/product');
+const userModel= require('../../../model/users');
 const productTransformer = require('../../../transformer/userTransformer/productTransformer');
 const productlistService = require('../../../service/userService/productservice');
 const listProductService = require('../../../service/userService/listProductService');
@@ -23,7 +24,10 @@ const{
 exports.listProduct = async (req,res)=>{
     try{
         let reqParam = req.body;
-        const responseData = await listProductService.productlistService({userId: req.user._id,userType: req.user.userType});
+        let userId = req?.user?._id ? req.user._id : undefined;
+        let userData = userId ? await userModel.findOne({_id: userId, status: 1}) : undefined;
+        let userType = userData ? userData.userType : undefined;
+        const responseData = await listProductService.productlistService({userId: userId,userType: userType});
         const response = productTransformer.listTransformProductDetailsUser(responseData)
         return helper.success(res,res.__("productListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response);
     }catch(e){

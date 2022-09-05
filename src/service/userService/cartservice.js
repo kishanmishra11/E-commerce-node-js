@@ -36,29 +36,62 @@ exports.cartlistService= async (data) => {
                     foreignField: "_id",
                     as: "subCategoryData",
                 },
-            },
+            });
+        if(data.userType === "prime"){
+            pipeline.push(
+                {
+                    $addFields:{
+                        productDiscount:{$divide:[({$multiply:[ {$arrayElemAt:["$productData.totalPrimeDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},
+                        discountedPrice:{$subtract:[{$arrayElemAt:["$productData.productPrice" , 0] },{$divide:[({$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },{$arrayElemAt:["$productData.totalPrimeDiscount",0]}]}),100]}]},
+                        totalDiscount: { $multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.totalPrimeDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},"$quantity"]},
+                        finalPrice:{$subtract:[{$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },"$quantity"]},{ $multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.totalPrimeDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},"$quantity"]}]},
+                    }
+                }
+            )
+        }else{
+            pipeline.push(
+                {
+                    $addFields:{
+                        productDiscount:{$divide:[({$multiply:[{$arrayElemAt:["$productData.regularDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},
+                        discountedPrice:{$subtract:[{$arrayElemAt:["$productData.productPrice" , 0] },{$divide:[({$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },{$arrayElemAt:["$productData.regularDiscount",0]}]}),100]}]},
+                        totalDiscount: { $multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.regularDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},"$quantity"]},
+                        finalPrice:{$subtract:[{$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },"$quantity"]},{ $multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.regularDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},"$quantity"]}]},
+
+                    }
+                }
+            )
+
+        }
+
+        pipeline.push(
             {
                 $project: {
+                    productDiscount: 1,
                     userId: 1,
                     quantity: 1,
-                    categoryId:{ $arrayElemAt: [ "$productData.categoryId", 0] },
-                    categoryName:{ $arrayElemAt: [ "$categoryData.categoryName", 0] },
-                    subCategoryId:{ $arrayElemAt: [ "$productData.subCategoryId", 0] },
-                    subCategoryName:{ $arrayElemAt: [ "$subCategoryData.subCategoryName", 0] },
-                    productId:1,
-                    productName:{ $arrayElemAt: [ "$productData.productName", 0] },
-                    productDescription:{ $arrayElemAt: [ "$productData.productDescription", 0] },
-                    productImage:{ $arrayElemAt: [ "$productData.productImage", 0] },
-                    productPrice:{ $arrayElemAt: [ "$productData.productPrice", 0] },
-                    productDiscount:{$divide:[({$multiply:[{$arrayElemAt:["$productData.productDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},
-                    discountedPrice:{$subtract:[{$arrayElemAt:["$productData.productPrice" , 0] },{$divide:[({$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },{$arrayElemAt:["$productData.productDiscount",0]}]}),100]}]},
-                    totalPrice:{$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },"$quantity"]},
-                    totalDiscount:{ $multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.productDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},"$quantity"]},
-                    finalPrice:{$subtract:[{$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },"$quantity"]},{ $multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.productDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},"$quantity"]}]},
+                    regularDiscount: {$arrayElemAt: ["$productData.regularDiscount", 0]},
+                    primeDiscount: {$arrayElemAt: ["$productData.primeDiscount", 0]},
+                    totalPrimeDiscount: {$sum: [{$arrayElemAt: ["$productData.regularDiscount", 0]}, {$arrayElemAt: ["$productData.primeDiscount", 0]}]},
+                    discountedPrice: 1,
+                    totalDiscount: 1,
+                    categoryId: {$arrayElemAt: ["$productData.categoryId", 0]},
+                    categoryName: {$arrayElemAt: ["$categoryData.categoryName", 0]},
+                    subCategoryId: {$arrayElemAt: ["$productData.subCategoryId", 0]},
+                    subCategoryName: {$arrayElemAt: ["$subCategoryData.subCategoryName", 0]},
+                    productId: 1,
+                    finalPrice: 1,
+                    productName: {$arrayElemAt: ["$productData.productName", 0]},
+                    productDescription: {$arrayElemAt: ["$productData.productDescription", 0]},
+                    productImage: {$arrayElemAt: ["$productData.productImage", 0]},
+                    productPrice: {$arrayElemAt: ["$productData.productPrice", 0]},
+                    totalPrice: {$multiply: [{$arrayElemAt: ["$productData.productPrice", 0]}, "$quantity"]},
+
+                    },
                 },
-            },
+
 
         );
+
         let obj = {};
         let sortBy = data.sortBy ? data.sortBy : -1;
         let sortKey = data.sortKey ? data.sortKey : "createdAt";
@@ -67,6 +100,8 @@ exports.cartlistService= async (data) => {
         pipeline.push(
             {$sort: obj},
         );
+
+
         const result = await Cart.aggregate(pipeline);
         return result;
     }catch (e) {

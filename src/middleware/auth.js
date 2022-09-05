@@ -9,7 +9,7 @@ const helper = require('../helper/helper');
 
 module.exports.userAuth = async (req,res,next)=>{
     try{
-        if(req.body.isGuest === "true"){
+        if(req.body.isGuest === true){
             await next();
         }else{
             const token = req.header('Authorization').replace('Bearer ','');
@@ -28,9 +28,11 @@ module.exports.userAuth = async (req,res,next)=>{
 
 module.exports.adminAuth = async (req,res,next)=>{
     try{
-        const token = req.header('Authorization').replace('Bearer','');
+        const token = req.header('Authorization').replace('Bearer ','');
 
+        console.log("to",token)
         let decode =  await jwt.verify(token, "mynameiskishan");
+        console.log("de",decode)
         if(!decode) return helper.error(res, 400,res.__("tokenExpired"));
         const admin = await AdminModel.findOne({_id: decode._id});
         if(!admin) return helper.error(res,400, res.__("adminNotFound"));
@@ -52,7 +54,6 @@ module.exports.adminAuth = async (req,res,next)=>{
             value = value[0];
             if(value.route.includes(route) === false) return helper.error(res,401,res.__("unAuthorized"));
        }
-
         await next();
     }catch(error){
         console.log("err",error);

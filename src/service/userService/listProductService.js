@@ -102,7 +102,6 @@ exports.productlistService= async (data) => {
         }
 
         const result = await product.aggregate(pipeline);
-        // console.log(result);
         return result;
     }catch (e) {
         console.log(e);

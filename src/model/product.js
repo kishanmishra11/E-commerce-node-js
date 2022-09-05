@@ -22,6 +22,9 @@ const productSchema = new mongoose.Schema({
     primeDiscount:{
       type:Number,
     },
+    totalPrimeDiscount:{
+        type: Number,
+    },
     productDescription : {
         type: String,
     },

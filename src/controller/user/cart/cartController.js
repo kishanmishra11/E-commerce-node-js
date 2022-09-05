@@ -3,6 +3,7 @@ const Cart = require("../../../model/cart");
 const applyPromoCode = require('../../../model/applyPromoCode');
 const promoCode = require('../../../model/promoCode');
 const deliveryCharge = require('../../../model/config');
+const productModel = require('../../../model/product');
 const CartTransformer = require('../../../transformer/userTransformer/cartTransformer');
 const cartlistService = require('../../../service/userService/cartservice');
 const { cartValidation } = require("../../../validation/userValidation/cartValidation");
@@ -52,12 +53,13 @@ exports.createCart =  async(req,res)=>{
             const cart = new Cart(req.body);
             update = await cart.save();
         }
-
-        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id, promoDiscount: promoDiscount,productId: req.body.productId , deliveryCharge:charge.deliveryCharge});
+        let product = await productModel.findOne({_id:req.body.productId})
+        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id, promoDiscount: promoDiscount,productId: req.body.productId , deliveryCharge:charge.deliveryCharge,userType: req.user.userType, regularDiscount:product.regularDiscount,primeDiscount:product.primeDiscount});
         const response = CartTransformer.transformCartDetails(update);
         const amountData = transformAmtData.listAmtDataDetails(amtDataServiceData);
         return helper.success(res,res.__("cartAddedSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,amountData})
     } catch(e){
+        console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }
@@ -69,7 +71,8 @@ exports.listCart = async (req,res)=>{
         let reqParam = req.body;
         const lang = req.header('language')
         if(lang) {req.setLocale(lang)}
-        const listCart = await cartlistService.cartlistService({userId: req.user._id,sortBy:reqParam.sortBy,sortKey:reqParam.sortKey});
+        let product = await productModel.find({productId:req.body.productId})
+        const listCart = await cartlistService.cartlistService({userId: req.user._id,sortBy:reqParam.sortBy,sortKey:reqParam.sortKey,userType: req.user.userType});
         const verifyUser = await applyPromoCode.findOne({userId: req.user._id });
         let verifyPromo, promoDiscount;
         if(verifyUser) {

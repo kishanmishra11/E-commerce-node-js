@@ -12,7 +12,6 @@ exports.amtDataService = async (data) => {
                     productId: ObjectId(data.productId)
                 }
             },
-
             {
                 $lookup: {
                     from: "product",
@@ -21,26 +20,34 @@ exports.amtDataService = async (data) => {
                     as: "productData",
                 },
             },
-
             {
                 $addFields:{
                     deliveryCharge: data.deliveryCharge,
+                    regularDiscount:data.regularDiscount,
+                    primeDiscount:{$sum:[data.primeDiscount,data.regularDiscount ]},
                 }
             },
 
+            {
+                $addFields: {
+                    discount: {
+                        "$cond": {
+                            if: {
+                                $eq: [data.userType, "prime"]
+                            },
+                            then: {$divide: [{$multiply:[ {$multiply: [{ $arrayElemAt: [ "$productData.productPrice", 0] }, "$primeDiscount"]}, "$quantity"]}, 100]},
+                            else: {$divide: [{$multiply:[ {$multiply: [{ $arrayElemAt: [ "$productData.productPrice", 0] }, "$regularDiscount"]}, "$quantity"]}, 100]},
+                        },
+                    },
+                },
+            },
             {
                 $addFields:{
                     "totalPrice": {$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },"$quantity"]},
                 }
             },
-
             {
                 $unwind: '$productData'
-            },
-            {
-                $addFields: {
-                    "discount": {$divide: [{$multiply: ["$productData.productPrice", "$productData.productDiscount", "$quantity"]}, 100]}
-                }
             },
 
             {
@@ -57,29 +64,16 @@ exports.amtDataService = async (data) => {
                     "promoDiscount": {$divide: [{$multiply: ["$subTotal", data.promoDiscount]}, 100]}
                 }
             },
-
-
             {
                 $addFields: {
                     finalAmount: {$round:[{$sum:[{$subtract:[{$subtract: ["$subTotal", "$discount"]},"$promoDiscount"]},"$deliveryCharge"]},2]}
 
                 }
             },
-            // {
-            //     $addFields: {
-            //         finalAmount: {
-            //             "$cond": {
-            //                 if: {
-            //                     $eq: ["$userType", "prime"]
-            //                 },
-            //                 then: "$amount",
-            //                 else: {$sum: ["$amount", "$deliveryCharge"]},
-            //             },
-            //         },
-            //     },
-            // },
-
         )
+
+
+
 
         const result = await Cart.aggregate(pipeline);
         return result;
