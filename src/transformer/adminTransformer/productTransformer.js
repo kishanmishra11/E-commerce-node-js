@@ -18,11 +18,8 @@ exports.producttransformaddress = (data,language) => {
         subCategoryDescription: data?.subCategoryDescription ? data.subCategoryDescription : "",
         productName: data?.productName ? data.productName: "",
         productDescription: data?.productDescription ? data.productDescription : "",
-        productPrice: data?.productPrice ? data.productPrice: "",
         regularDiscount: data?.regularDiscount ? data.regularDiscount: 0,
         primeDiscount: data?.primeDiscount ? data.primeDiscount: 0,
-        regularDiscountedPrice: data?.regularDiscountedPrice ? data.regularDiscountedPrice: 0,
-        primeDiscountedPrice: data?.primeDiscountedPrice ? data.primeDiscountedPrice: 0,
         productImage: data?.productImage ? helper.urlInfo(data.productImage,'user'):"",
         status: data?.status ? data.status : 0,
         cartQuantity:  data?.cartQuantity ? data.cartQuantity : 0,
@@ -35,11 +32,8 @@ exports.producttransformCreate = (data) => {
         categoryId: data?.categoryId ? data.categoryId: "",
         subCategoryId: data?.subCategoryId ? data.subCategoryId: "",
         productName: data?.productName ? data.productName: "",
-        productPrice: data?.productPrice ? data.productPrice: "",
         regularDiscount: data?.regularDiscount ? data.regularDiscount: 0,
         primeDiscount: data?.primeDiscount ? data.primeDiscount: 0,
-        regularDiscountedPrice: data?.regularDiscountedPrice ? data.regularDiscountedPrice: 0,
-        primeDiscountedPrice: data?.primeDiscountedPrice ? data.primeDiscountedPrice: 0,
         productDescription: data?.productDescription ? data.productDescription : "",
         productImage: data?.productImage ? helper.urlInfo(data.productImage,'user'):"",
         status: data?.status ? data.status : 0
@@ -66,3 +60,39 @@ exports.productlisttransformAddressDetails = (arrayData,language) => {
     arrayData = data;
     return arrayData;
 };
+
+
+
+exports.productPriceListTransform = (data) => {
+    return {
+        productPriceListId: data?._id ? data._id: "",
+        productId: data?.productId ? data.productId: "",
+        price: data?.price ? data.price: 0,
+        colorName: data?.colorName ? data.colorName : "",
+        regularDiscountedPrice: data?.regularDiscountedPrice ? data.regularDiscountedPrice: 0,
+        primeDiscountedPrice: data?.primeDiscountedPrice ? data.primeDiscountedPrice: 0,
+        status: data?.status ? data.status : 0
+    };
+};
+
+exports.productPriceListTransformDetails = (arrayData) => {
+    let data = [];
+    if (arrayData && arrayData.length > 0) {
+        arrayData.forEach((a) => {
+            data.push(this.productPriceListTransform(a));
+        });
+    }
+    arrayData = data;
+    return arrayData;
+};
+
+
+exports.productPriceListTransformDataDetails = (arrayData) => {
+    let addressData = null;
+    if (arrayData) {
+        addressData = this.productPriceListTransform(arrayData);
+    }
+    return addressData;
+};
+
+

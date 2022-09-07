@@ -108,5 +108,6 @@
 	"orderAlreadyCancelled": "order Already Cancelled",
 	"youCanNotCancelOrder": "you Can Not Cancel Order",
 	"dataNotFound": "data Not Found",
-	"deliveryChargeUpdatedSuccessfully": "delivery Charge Updated Successfully"
+	"deliveryChargeUpdatedSuccessfully": "delivery Charge Updated Successfully",
+	"productColorAlreadyExists": "productColorAlreadyExists"
 }

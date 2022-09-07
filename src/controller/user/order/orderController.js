@@ -128,7 +128,6 @@ exports.viewOrder = async (req,res) => {
         // let subData = await subOrderModel.find({orderId: reqParam.orderId});
         if(!existingOrder) return helper.success(res, res.__("orderNotFound"), META_STATUS_0, SUCCESSFUL);
         const subData = await subOrderService.subOrderService({orderId:reqParam.orderId})
-        // console.log(subData)
         const response = orderTransformerUser.transformOrderDetailsUser(existingOrder);
         const subOrderData = subOrderTransformer.listTransformSubOrderDetails(subData);
         return helper.success(res,res.__("orderFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,subOrderData})

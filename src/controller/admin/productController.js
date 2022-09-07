@@ -1,4 +1,5 @@
 const Product = require('../../model/product');
+const productPriceListModel = require('../../model/productPriceList');
 const userInfo = require('../../model/users');
 const productTransformerAdmin = require('../../transformer/adminTransformer/productTransformer');
 const productService = require('../../service/adminService/productservice');
@@ -30,8 +31,11 @@ exports.listProduct = async (req,res)=>{
         const [productService2] = await productService.productlistService({skip: skipCount, limit: limitCount,sortBy:reqParam.sortBy,sortKey:reqParam.sortKey,search:reqParam.search,status: reqParam.status})
         const responseData = productService2 &&  productService2.data ? productService2.data : [];
         const totalCount =(productService2, productService2.totalRecords &&  productService2.totalRecords[0] &&  productService2.totalRecords[0].count);
+        let productPriceData = await productPriceListModel.find({});
         const response = productTransformerAdmin.productlisttransformAddressDetails(responseData,lang)
-        return helper.success(res,res.__("productListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response,{"totalCount":totalCount});
+        const productPriceList = productTransformerAdmin.productPriceListTransformDetails(productPriceData)
+
+        return helper.success(res,res.__("productListedSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,productPriceList},{"totalCount":totalCount});
     }catch(e){
         console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
@@ -47,6 +51,7 @@ exports.addEditProduct = async (req,res) => {
         //joi validation
         let reqParam = req.body;
         let productExist
+        let productPriceData
 
         // let user = await userInfo.findOne({userId:reqParam._id})
         // console.log(user)
@@ -58,42 +63,57 @@ exports.addEditProduct = async (req,res) => {
             productExist = await Product.findOne({_id: reqParam.productId, status: {$ne: 3}});
             if(!productExist) return helper.success(res, res.__("productNotFound"), META_STATUS_0, SUCCESSFUL);
 
+            if(reqParam.productPriceListId){
+                productPriceData = await productPriceListModel.findOne({colorName:reqParam.colorName});
+                if(productPriceData) return helper.success(res, res.__("productColorAlreadyExists"), META_STATUS_0, SUCCESSFUL);
+            }else{
+                productPriceData = await productPriceListModel.findOne({colorName:reqParam.colorName});
+                if(productPriceData) return helper.success(res, res.__("productColorAlreadyExists"), META_STATUS_0, SUCCESSFUL);
+            }
+            productPriceData = new productPriceListModel();
+
         } else  {
             if(req.file && req.file.filename) reqParam.productImage = req.file.filename;
             const validationMessage  = await productValidation(reqParam);
             if(validationMessage) return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
-
             productExist = await Product.findOne({productName: reqParam.productName, status: {$ne: 3}});
             if(productExist) return helper.success(res, res.__("productAlreadyExists"), META_STATUS_0, SUCCESSFUL);
 
             productExist = new Product();
         }
+
+
         productExist.categoryId = req.body.categoryId ? reqParam.categoryId : productExist.categoryId;
         productExist.subCategoryId = req.body.subCategoryId ? reqParam.subCategoryId : productExist.subCategoryId;
         productExist.productName = req.body.productName ? reqParam.productName : productExist.productName;
         productExist.productNameGuj = req.body.productNameGuj ? reqParam.productNameGuj : productExist.productNameGuj;
-        productExist.productPrice = req.body.productPrice ? reqParam.productPrice : productExist.productPrice;
         productExist.regularDiscount = req.body.regularDiscount ? reqParam.regularDiscount : productExist.regularDiscount;
         productExist.primeDiscount = req.body.primeDiscount ? reqParam.primeDiscount : productExist.primeDiscount;
+        productExist.totalPrimeDiscount = productExist.regularDiscount + productExist.primeDiscount;
         productExist.productDescription = req.body.productDescription ? reqParam.productDescription : productExist.productDescription;
         productExist.productDescriptionGuj = req.body.productDescriptionGuj ? reqParam.productDescriptionGuj : productExist.productDescriptionGuj;
         productExist.productImage = req.body.productImage ? reqParam.productImage : productExist.productImage;
         productExist.status = req.body.status ? reqParam.status : productExist.status;
 
-        await productExist.save();
-        // console.log(productExist)
-        // let discount = {discountedPrice : req.body.productPrice - (req.body.productPrice * (req.body.regularDiscount + req.body.primeDiscount) /100)};
-        let regularDiscount ={regularDiscountedPrice : productExist.productPrice -((productExist.productPrice * productExist.regularDiscount)/100)}
-        console.log(regularDiscount)
-        let primeDiscount = {primeDiscountedPrice : productExist.productPrice -((productExist.productPrice * (productExist.regularDiscount + productExist.primeDiscount))/100)}
-        console.log(primeDiscount)
+        productPriceData.productId = req.body.productId ? reqParam.productId : productPriceData.productId;
+        productPriceData.colorName = req.body.colorName ? reqParam.colorName : productPriceData.colorName;
+        productPriceData.stoke = req.body.stoke ? reqParam.stoke : productPriceData.stoke;
+        productPriceData.price = req.body.price ? reqParam.price : productPriceData.price;
+        productPriceData.regularDiscountedPrice = productPriceData.price -((productPriceData.price * productExist.regularDiscount)/100)
+        productPriceData.primeDiscountedPrice = productPriceData.price -((productPriceData.price * (productExist.regularDiscount + productExist.primeDiscount))/100),
+        productPriceData.status = req.body.status ? reqParam.status : productPriceData.status;
 
-        let productExist2 = Object.assign(productExist,regularDiscount,primeDiscount);
-        const response = productTransformerAdmin.producttransformAddressDetails(productExist2);
+
+        await productExist.save();
+        await productPriceData.save();
+
+        const response = productTransformerAdmin.producttransformAddressDetails(productExist);
+        const productPriceList = productTransformerAdmin.productPriceListTransformDetails(productPriceData)
+
         if (req.body.productId) {
-            return helper.success(res,res.__("productUpdatedSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
+            return helper.success(res,res.__("productUpdatedSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,productPriceList})
         }else{
-            return helper.success(res,res.__("productAddedSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
+            return helper.success(res,res.__("productAddedSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,productPriceList})
         }
     } catch(e){
         console.log(e)
@@ -109,12 +129,10 @@ exports.viewProduct = async (req,res) => {
         let reqParam = req.body;
         let existingProduct = await Product.findOne({_id: reqParam.productId, status: {$ne: 3}});
         if(!existingProduct) return helper.success(res, res.__("productNotFound"), META_STATUS_0, SUCCESSFUL);
-
-        let regularDiscount ={regularDiscountedPrice : existingProduct.productPrice -((existingProduct.productPrice * existingProduct.regularDiscount)/100)}
-        let primeDiscount = {primeDiscountedPrice : existingProduct.productPrice -((existingProduct.productPrice * (existingProduct.regularDiscount + existingProduct.primeDiscount))/100)}
-        let productExist = Object.assign(existingProduct,regularDiscount,primeDiscount);
-        const response = productTransformerAdmin.producttransformAddressDetails(productExist);
-        return helper.success(res,res.__("productFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
+        let productPriceData = await productPriceListModel.find({productId:reqParam.productId});
+        const response = productTransformerAdmin.producttransformAddressDetails(existingProduct);
+        const productPriceList = productTransformerAdmin.productPriceListTransformDetails(productPriceData)
+        return helper.success(res,res.__("productFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,productPriceList})
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }

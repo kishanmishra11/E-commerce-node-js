@@ -13,9 +13,6 @@ const productSchema = new mongoose.Schema({
     productNameGuj : {
         type: String,
     },
-    productPrice : {
-        type: Number,
-    },
     regularDiscount : {
         type: Number,
     },
