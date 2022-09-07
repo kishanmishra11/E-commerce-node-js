@@ -51,9 +51,12 @@ exports.createOrder = async (req,res)=>{
 
         } else promoDiscount = 0
         let delivery = await deliveryCharge.findOne()
-        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id,promoDiscount: promoDiscount,deliveryCharge:delivery.deliveryCharge});
+        if (req.user.userType === "prime"){
+            delivery.deliveryCharge = 0
+        }
+        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id,promoDiscount: promoDiscount,deliveryCharge:delivery.deliveryCharge,userType: req.user.userType});
 
-        let data={
+        let data= {
             userId: req.user._id,
             subTotal : amtDataServiceData[0].subTotal,
             productDiscount:amtDataServiceData[0].discount,
@@ -106,7 +109,7 @@ exports.createOrder = async (req,res)=>{
 exports.listOrder = async (req,res)=>{
     try{
         let reqParam = req.body;
-        const orderList = await order.find({userId:reqParam.userId});
+        const orderList = await order.find();
         const response = orderTransformerUser.listTransformOrderDetailsUser(orderList)
         return helper.success(res,res.__("orderListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response);
     }catch(e){

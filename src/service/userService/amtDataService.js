@@ -9,7 +9,6 @@ exports.amtDataService = async (data) => {
             {
                 $match: {
                     userId: ObjectId(data.userId),
-                    productId: ObjectId(data.productId)
                 }
             },
             {
@@ -23,38 +22,36 @@ exports.amtDataService = async (data) => {
             {
                 $addFields:{
                     deliveryCharge: data.deliveryCharge,
-                    regularDiscount:data.regularDiscount,
-                    primeDiscount:{$sum:[data.primeDiscount,data.regularDiscount ]},
                 }
             },
 
-            {
-                $addFields: {
-                    discount: {
-                        "$cond": {
-                            if: {
-                                $eq: [data.userType, "prime"]
-                            },
-                            then: {$divide: [{$multiply:[ {$multiply: [{ $arrayElemAt: [ "$productData.productPrice", 0] }, "$primeDiscount"]}, "$quantity"]}, 100]},
-                            else: {$divide: [{$multiply:[ {$multiply: [{ $arrayElemAt: [ "$productData.productPrice", 0] }, "$regularDiscount"]}, "$quantity"]}, 100]},
-                        },
-                    },
-                },
-            },
             {
                 $addFields:{
                     "totalPrice": {$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },"$quantity"]},
                 }
             },
+
             {
                 $unwind: '$productData'
             },
-
+            {
+                $addFields: {
+                    discount: {
+                        $cond: {
+                            if: {
+                                $eq: [data.userType, "prime"]
+                            },
+                            then: {$divide: [{$multiply: ["$productData.productPrice", "$productData.totalPrimeDiscount", "$quantity"]}, 100]},
+                            else: {$divide: [{$multiply: ["$productData.productPrice", "$productData.regularDiscount", "$quantity"]}, 100]}
+                        },
+                    },
+                },
+            },
             {
                 $group:{
                     _id: "$userId",
                     subTotal:{ $sum : "$totalPrice" },
-                    discount:{ $sum :"$discount" },
+                    discount: {$sum: "$discount"},
                     promoDiscount:{ $sum :"$promoDiscount" },
                     deliveryCharge:{$sum :"$deliveryCharge"},
                 },
@@ -71,9 +68,6 @@ exports.amtDataService = async (data) => {
                 }
             },
         )
-
-
-
 
         const result = await Cart.aggregate(pipeline);
         return result;

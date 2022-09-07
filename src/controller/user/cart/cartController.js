@@ -36,7 +36,6 @@ exports.createCart =  async(req,res)=>{
         if (req.user.userType === "prime"){
             charge.deliveryCharge = 0
         }
-
         const verifyUser = await applyPromoCode.findOne({userId: req.user._id });
         let verifyPromo, promoDiscount;
         if(verifyUser) {
@@ -54,7 +53,7 @@ exports.createCart =  async(req,res)=>{
             update = await cart.save();
         }
         let product = await productModel.findOne({_id:req.body.productId})
-        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id, promoDiscount: promoDiscount,productId: req.body.productId , deliveryCharge:charge.deliveryCharge,userType: req.user.userType, regularDiscount:product.regularDiscount,primeDiscount:product.primeDiscount});
+        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id, promoDiscount: promoDiscount,productId: req.body.productId , deliveryCharge:charge.deliveryCharge,userType: req.user.userType, regularDiscount:product.regularDiscount,totalPrimeDiscount:product.totalPrimeDiscount});
         const response = CartTransformer.transformCartDetails(update);
         const amountData = transformAmtData.listAmtDataDetails(amtDataServiceData);
         return helper.success(res,res.__("cartAddedSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,amountData})
@@ -79,7 +78,11 @@ exports.listCart = async (req,res)=>{
             verifyPromo = await promoCode.findOne({_id: verifyUser.promoCodeId});
             promoDiscount = verifyPromo.promoDiscount;
         } else promoDiscount = 0
-        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id, promoDiscount: promoDiscount});
+        let charge = await deliveryCharge.findOne({userId: req.user._id });
+        if (req.user.userType === "prime"){
+            charge.deliveryCharge = 0
+        }
+        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id, promoDiscount: promoDiscount, deliveryCharge:charge.deliveryCharge,userType: req.user.userType});
         const cartData = CartTransformer.listtransformCartDetails(listCart);
         const amountData = transformAmtData.listAmtDataDetails(amtDataServiceData);
         return helper.success(res,res.__("cartListedSuccessfully"),META_STATUS_1,SUCCESSFUL,{cartData,amountData})

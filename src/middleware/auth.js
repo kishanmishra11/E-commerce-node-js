@@ -30,9 +30,7 @@ module.exports.adminAuth = async (req,res,next)=>{
     try{
         const token = req.header('Authorization').replace('Bearer ','');
 
-        console.log("to",token)
         let decode =  await jwt.verify(token, "mynameiskishan");
-        console.log("de",decode)
         if(!decode) return helper.error(res, 400,res.__("tokenExpired"));
         const admin = await AdminModel.findOne({_id: decode._id});
         if(!admin) return helper.error(res,400, res.__("adminNotFound"));
@@ -56,7 +54,6 @@ module.exports.adminAuth = async (req,res,next)=>{
        }
         await next();
     }catch(error){
-        console.log("err",error);
         return helper.error(res,401,res.__("invalidToken"));
     }
 }

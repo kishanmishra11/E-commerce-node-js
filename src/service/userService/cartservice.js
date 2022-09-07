@@ -85,7 +85,6 @@ exports.cartlistService= async (data) => {
                     productImage: {$arrayElemAt: ["$productData.productImage", 0]},
                     productPrice: {$arrayElemAt: ["$productData.productPrice", 0]},
                     totalPrice: {$multiply: [{$arrayElemAt: ["$productData.productPrice", 0]}, "$quantity"]},
-
                     },
                 },
 
