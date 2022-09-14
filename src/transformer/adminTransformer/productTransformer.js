@@ -1,5 +1,18 @@
 const helper = require('../../helper/helper');
-exports.producttransformaddress = (data,language) => {
+
+let productPriceListTransformDetails = (arrayData) => {
+    let data = [];
+    if (arrayData && arrayData.length > 0) {
+        arrayData.forEach((a) => {
+            data.push(this.productPriceListTransform(a));
+        });
+    }
+    arrayData = data;
+    return arrayData;
+};
+
+
+exports.producttransformaddress =  (data,language) => {
     if (language == "guj") {
         data.categoryName = data.categoryNameGuj
         data.categoryDescription = data.categoryDescriptionGuj
@@ -23,6 +36,7 @@ exports.producttransformaddress = (data,language) => {
         productImage: data?.productImage ? helper.urlInfo(data.productImage,'user'):"",
         status: data?.status ? data.status : 0,
         cartQuantity:  data?.cartQuantity ? data.cartQuantity : 0,
+        colorPriceData: data?.colorPrice && data.colorPrice.length > 0 ? productPriceListTransformDetails(data.colorPrice): [],
     };
 };
 
@@ -37,7 +51,6 @@ exports.producttransformCreate = (data) => {
         productDescription: data?.productDescription ? data.productDescription : "",
         productImage: data?.productImage ? helper.urlInfo(data.productImage,'user'):"",
         status: data?.status ? data.status : 0
-
     };
 };
 
@@ -63,7 +76,7 @@ exports.productlisttransformAddressDetails = (arrayData,language) => {
 
 
 
-exports.productPriceListTransform = (data) => {
+exports.productPriceListTransform =  (data) => {
     return {
         productPriceListId: data?._id ? data._id: "",
         productId: data?.productId ? data.productId: "",
@@ -75,16 +88,7 @@ exports.productPriceListTransform = (data) => {
     };
 };
 
-exports.productPriceListTransformDetails = (arrayData) => {
-    let data = [];
-    if (arrayData && arrayData.length > 0) {
-        arrayData.forEach((a) => {
-            data.push(this.productPriceListTransform(a));
-        });
-    }
-    arrayData = data;
-    return arrayData;
-};
+
 
 
 exports.productPriceListTransformDataDetails = (arrayData) => {
@@ -96,3 +100,13 @@ exports.productPriceListTransformDataDetails = (arrayData) => {
 };
 
 
+exports.productPriceListTransformData = (arrayData) => {
+    let data = [];
+    if (arrayData && arrayData.length > 0) {
+        arrayData.forEach((a) => {
+            data.push(this.producttransformaddress(a));
+        });
+    }
+    arrayData = data;
+    return arrayData;
+};

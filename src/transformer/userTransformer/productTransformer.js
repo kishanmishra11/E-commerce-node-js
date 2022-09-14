@@ -1,6 +1,20 @@
 const helper = require('../../helper/helper');
+
+let listTransformProductDataUser = (arrayData, language) => {
+    let data = [];
+    if (arrayData && arrayData.length > 0) {
+        arrayData.forEach((a) => {
+            data.push(this.productPriceListTransformUser(a, language));
+        });
+    }
+    arrayData = data;
+    return arrayData;
+};
+
+
+
 exports.productTransformUser = (data,language) => {
-    if (language == "guj") {
+    if (language === "guj") {
         data.categoryName = data.categoryNameGuj
         data.categoryDescription = data.categoryDescriptionGuj
         data.subCategoryName = data.subCategoryNameGuj
@@ -18,12 +32,23 @@ exports.productTransformUser = (data,language) => {
         subCategoryDescription: data?.subCategoryDescription ? data.subCategoryDescription : "",
         productName: data?.productName ? data.productName: "",
         productDescription: data?.productDescription ? data.productDescription : "",
-        productPrice: data?.productPrice ? data.productPrice: "",
         productDiscount: data?.productDiscount ? data.productDiscount: 0,
-        discountedPrice:data?.discountedPrice ? data.discountedPrice: 0,
         productImage: data?.productImage ? helper.urlInfo(data.productImage,'user'):"",
         status: data?.status ? data.status : 0,
         cartQuantity:  data?.cartQuantity ? data.cartQuantity : 0,
+        colorPriceData: data?.colorPrice && data.colorPrice.length > 0 ? listTransformProductDataUser(data.colorPrice): [],
+    };
+};
+
+exports.productPriceListTransformUser =  (data) => {
+    return {
+        productPriceListId: data?._id ? data._id: "",
+        productId: data?.productId ? data.productId: "",
+        price: data?.price ? data.price: 0,
+        colorName: data?.colorName ? data.colorName : "",
+        discountedPrice: data?.discountedPrice ? data.discountedPrice: 0,
+        status: data?.status ? data.status : 0,
+        inStock: data?.inStock ? data.inStock :false,
     };
 };
 
@@ -33,13 +58,11 @@ exports.productTransformCreateUser = (data,data2) => {
         categoryId: data?.categoryId ? data.categoryId: "",
         subCategoryId: data?.subCategoryId ? data.subCategoryId: "",
         productName: data?.productName ? data.productName: "",
-        productPrice: data?.productPrice ? data.productPrice: "",
         productDiscount:data2?.productDiscount ? data2.productDiscount: 0,
-        discountedPrice:data2?.discountedPrice ? data2.discountedPrice: 0,
         productDescription: data?.productDescription ? data.productDescription : "",
         productImage: data?.productImage ? helper.urlInfo(data.productImage,'user'):"",
-        status: data?.status ? data.status : 0
-
+        status: data?.status ? data.status : 0,
+        colorPriceData: data2?.colorPrice && data2.colorPrice.length > 0 ? listTransformProductDataUser(data2.colorPrice): [],
     };
 };
 
@@ -62,3 +85,5 @@ exports.listTransformProductDetailsUser = (arrayData, language) => {
     arrayData = data;
     return arrayData;
 };
+
+

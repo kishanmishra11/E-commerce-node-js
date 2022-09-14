@@ -17,7 +17,7 @@ const productPriceListSchema = new mongoose.Schema({
         primeDiscountedPrice: {
             type: Number,
         },
-        stoke: {
+        stock: {
             type: Number,
         },
         status: {

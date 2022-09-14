@@ -74,9 +74,9 @@ exports.productlistService= async (data) => {
                     productDescriptionGuj:1,
                     productImage:1,
                     status:1,
-                    colorName:["productPriceListData.colorName"],
-                    stoke:["productPriceListData.stoke"],
-                    price:["productPriceListData.price"],
+                    colorPrice:"$productPriceListData",
+                    // stoke:["productPriceListData.stoke"],
+                     //price:["productPriceListData.price"],
                 }
             },
         );

@@ -36,15 +36,17 @@ exports.listProduct = async (req,res)=>{
     }
 }
 
-
 //view Product
 exports.viewProduct = async (req,res) => {
     try{
         let reqParam = req.body;
+        let userId = req?.user?._id ? req.user._id : undefined;
+        let userData = userId ? await userModel.findOne({_id: userId, status: 1}) : undefined;
+        let userType = userData ? userData.userType : undefined;
         let existingProduct = await ProductController.findOne({_id: reqParam.productId, status: {$ne: 3}});
         if(!existingProduct) return helper.success(res, res.__("productNotFound"), META_STATUS_0, SUCCESSFUL);
-        const product = await productlistService.productListService({userType: req.user.userType, productId:reqParam.productId });
-        const response = productTransformer.productTransformDataUser(existingProduct,product[0]);
+        const product = await productlistService.productListService({userType: userType, productId:reqParam.productId });
+        const response = productTransformer.productTransformCreateUser(existingProduct,product[0]);
         return helper.success(res,res.__("productFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));

@@ -8,23 +8,28 @@ exports.productlistService= async (data) => {
 
             {
                 $lookup: {
-                    from: "subCategory",
-                    localField: "subCategoryId",
-                    foreignField: "_id",
-                    as: "subCategoryData"
-                }
-            },
-
-
-            {
-                $lookup: {
                     from: "category",
                     localField: "categoryId",
                     foreignField: "_id",
                     as: "categoryData"
                 }
             },
-
+            {
+                $lookup: {
+                    from: "subCategory",
+                    localField: "subCategoryId",
+                    foreignField: "_id",
+                    as: "subCategoryData"
+                }
+            },
+            {
+                $lookup: {
+                    from: "productPriceList",
+                    localField: "_id",
+                    foreignField: "productId",
+                    as: "colorPrice"
+                }
+            },
             {
                 $lookup: {
                     from: "cart",
@@ -48,58 +53,166 @@ exports.productlistService= async (data) => {
                     as: "cartData"
                 }
             },
-
-
-            {
-                $project: {
-                    cartQuantity: { $arrayElemAt: [ "$cartData.quantity", 0] },
-                    categoryName:{ $arrayElemAt: [ "$categoryData.categoryName", 0] },
-                    categoryNameGuj:{ $arrayElemAt: [ "$categoryData.categoryNameGuj", 0] },
-                    categoryDescription:{ $arrayElemAt: [ "$categoryData.categoryDescription", 0] },
-                    categoryDescriptionGuj:{ $arrayElemAt: [ "$categoryData.categoryDescriptionGuj", 0] },
-                    categoryId: 1,
-                    subCategoryId:1,
-                    subCategoryName:{ $arrayElemAt: [ "$subCategoryData.subCategoryName", 0] },
-                    subCategoryNameGuj:{ $arrayElemAt: [ "$subCategoryData.subCategoryNameGuj", 0] },
-                    subCategoryDescription:{ $arrayElemAt: [ "$subCategoryData.subCategoryDescription", 0] },
-                    subCategoryDescriptionGuj:{ $arrayElemAt: [ "$subCategoryData.subCategoryDescriptionGuj", 0] },
-                    productId:1,
-                    productName:1,
-                    productNameGuj:1,
-                    productPrice:1,
-                    regularDiscount:1,
-                    primeDiscount:1,
-                    regularDiscountedPrice:{ $subtract: ["$productPrice",{$divide:[({$multiply:["$productPrice", "$regularDiscount"]}), 100]}] },
-                    primeDiscountedPrice:{ $subtract: ["$productPrice",{$divide:[({$multiply:["$productPrice", "$primeDiscount"]}), 100]}] },
-                    productDescription:1,
-                    productDescriptionGuj:1,
-                    productImage:1,
-                    status:1
-                }
-            },
-
         );
 
-        if(data.userType === "prime"){
-            pipeline.push(
-                {
-                    $addFields:{
-                        productDiscount:{ $sum:["$regularDiscount", "$primeDiscount"] },
-                        discountedPrice:{ $subtract: ["$productPrice",{$divide:[({$multiply:["$productPrice", { $sum:["$regularDiscount", "$primeDiscount"] }]}), 100]}] },
-                    }
-                }
-            )
-        }else{
-            pipeline.push(
-                {
-                    $addFields:{
-                        productDiscount: "$regularDiscount",
-                        discountedPrice:{ $subtract: ["$productPrice",{$divide:[({$multiply:["$productPrice", "$regularDiscount"]}), 100]}] },
-                    }
-                }
-            )
 
-        }
+        pipeline.push({
+            $addFields:{
+                productDiscount:{
+                    $cond:{
+                        if:{
+                            $eq:[data.userType, "prime"]
+                        },
+                        then: {$sum:["$regularDiscount", "$primeDiscount"]},
+                        else:"$regularDiscount",
+                    }
+                }
+            }
+        });
+
+
+        pipeline.push(
+            {
+                $addFields: {
+                    stock: {
+                        $map: {
+                            input: "$colorPrice",
+                            as: "color",
+                            in: {
+                                $cond: [
+                                    {
+                                        $gt: [
+                                            "$$color.stock",
+                                            0
+                                        ]
+                                    },
+                                    {
+                                        $mergeObjects: [
+                                            "$$color",
+                                            {
+                                                "inStock": true
+                                            }
+                                        ]
+                                    },
+
+                                    {
+                                        $mergeObjects: [
+                                            "$$color",
+                                            {
+                                                "inStock": false
+                                            }
+                                        ]
+                                    },
+                                ]
+                            }
+                        }
+                    }
+                },
+            },
+            {
+                $addFields: {
+                    discountedPrice : {
+                        $map: {
+                            input: "$colorPrice",
+                            as: "color",
+                            in: {
+                                $cond: [
+                                    {
+                                        $eq: [
+                                            data.userType, "prime",
+                                        ]
+                                    },
+                                    {
+                                        $mergeObjects: [
+                                            "$$color",
+                                            {
+                                                "discountedPrice": "$$color.primeDiscountedPrice"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        $mergeObjects: [
+                                            "$$color",
+                                            {
+                                                "discountedPrice": "$$color.regularDiscountedPrice"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    colorPrice:{
+                        $map: {
+                            input: "$stock",
+                            as: "one",
+                            in: {
+                                $mergeObjects: [
+                                    "$$one",
+                                    {
+                                        $arrayElemAt: [
+                                            {
+                                                $filter: {
+                                                    input: "$discountedPrice",
+                                                    as: "two",
+                                                    cond: {
+                                                        $eq: [
+                                                            "$$two._id",
+                                                            "$$one._id"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            0
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                }
+            }
+        );
+
+
+        pipeline.push(
+            {
+                $project: {
+                    cartQuantity: {$arrayElemAt: ["$cartData.quantity", 0]},
+                    categoryName: {$arrayElemAt: ["$categoryData.categoryName", 0]},
+                    categoryNameGuj: {$arrayElemAt: ["$categoryData.categoryNameGuj", 0]},
+                    categoryDescription: {$arrayElemAt: ["$categoryData.categoryDescription", 0]},
+                    categoryDescriptionGuj: {$arrayElemAt: ["$categoryData.categoryDescriptionGuj", 0]},
+                    categoryId: 1,
+                    subCategoryId: 1,
+                    subCategoryName: {$arrayElemAt: ["$subCategoryData.subCategoryName", 0]},
+                    subCategoryNameGuj: {$arrayElemAt: ["$subCategoryData.subCategoryNameGuj", 0]},
+                    subCategoryDescription: {$arrayElemAt: ["$subCategoryData.subCategoryDescription", 0]},
+                    subCategoryDescriptionGuj: {$arrayElemAt: ["$subCategoryData.subCategoryDescriptionGuj", 0]},
+                    productId: 1,
+                    productName: 1,
+                    productNameGuj: 1,
+                    regularDiscount: 1,
+                    primeDiscount: 1,
+                    productDiscount: 1,
+                    productDescription: 1,
+                    productDescriptionGuj: 1,
+                    productImage: 1,
+                    status: 1,
+                    inStock:1,
+                    discountedPrice:1,
+                    colorPrice: 1,
+
+                }
+            },
+        );
+
+
+
 
         const result = await product.aggregate(pipeline);
         return result;

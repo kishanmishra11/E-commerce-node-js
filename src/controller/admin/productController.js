@@ -33,9 +33,7 @@ exports.listProduct = async (req,res)=>{
         const totalCount =(productService2, productService2.totalRecords &&  productService2.totalRecords[0] &&  productService2.totalRecords[0].count);
         let productPriceData = await productPriceListModel.find({});
         const response = productTransformerAdmin.productlisttransformAddressDetails(responseData,lang)
-        const productPriceList = productTransformerAdmin.productPriceListTransformDetails(productPriceData)
-
-        return helper.success(res,res.__("productListedSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,productPriceList},{"totalCount":totalCount});
+        return helper.success(res,res.__("productListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response,{"totalCount":totalCount});
     }catch(e){
         console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
@@ -45,30 +43,34 @@ exports.listProduct = async (req,res)=>{
 
 //add-edit Product
 exports.addEditProduct = async (req,res) => {
-    try{
+    try {
         const lang = req.header('language')
-        if(lang) {req.setLocale(lang)}
+        if (lang) {
+            req.setLocale(lang)
+        }
         //joi validation
         let reqParam = req.body;
         let productExist
         let productPriceData
+        let productExist2
+        let productPriceData2
 
         // let user = await userInfo.findOne({userId:reqParam._id})
         // console.log(user)
-        if(reqParam.productId){
-            if(req.file && req.file.filename) {reqParam.productImage = req.file.filename};
-            const validationMessage  = await editProductValidation(reqParam);
-            if(validationMessage) return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
+        if (reqParam.productId) {
+            if (req.file && req.file.filename) {reqParam.productImage = req.file.filename};
+            const validationMessage = await editProductValidation(reqParam);
+            if (validationMessage) return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
 
             productExist = await Product.findOne({_id: reqParam.productId, status: {$ne: 3}});
-            if(!productExist) return helper.success(res, res.__("productNotFound"), META_STATUS_0, SUCCESSFUL);
+            if (!productExist) return helper.success(res, res.__("productNotFound"), META_STATUS_0, SUCCESSFUL);
 
-            if(reqParam.productPriceListId){
-                productPriceData = await productPriceListModel.findOne({colorName:reqParam.colorName});
-                if(productPriceData) return helper.success(res, res.__("productColorAlreadyExists"), META_STATUS_0, SUCCESSFUL);
-            }else{
-                productPriceData = await productPriceListModel.findOne({colorName:reqParam.colorName});
-                if(productPriceData) return helper.success(res, res.__("productColorAlreadyExists"), META_STATUS_0, SUCCESSFUL);
+            if (reqParam.productPriceListId) {
+                productPriceData = await productPriceListModel.findOne({colorName: reqParam.colorName});
+                if (productPriceData) return helper.success(res, res.__("productColorAlreadyExists"), META_STATUS_0, SUCCESSFUL);
+            } else {
+                    productPriceData2 = await productPriceListModel.findOne({productId:reqParam.productId,colorName: reqParam.colorName});
+                    if (productPriceData2) return helper.success(res, res.__("productColorAlreadyExists"), META_STATUS_0, SUCCESSFUL);
             }
             productPriceData = new productPriceListModel();
 
@@ -108,7 +110,7 @@ exports.addEditProduct = async (req,res) => {
         await productPriceData.save();
 
         const response = productTransformerAdmin.producttransformAddressDetails(productExist);
-        const productPriceList = productTransformerAdmin.productPriceListTransformDetails(productPriceData)
+        const productPriceList = productTransformerAdmin.productPriceListTransformData(productPriceData)
 
         if (req.body.productId) {
             return helper.success(res,res.__("productUpdatedSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,productPriceList})
@@ -131,7 +133,7 @@ exports.viewProduct = async (req,res) => {
         if(!existingProduct) return helper.success(res, res.__("productNotFound"), META_STATUS_0, SUCCESSFUL);
         let productPriceData = await productPriceListModel.find({productId:reqParam.productId});
         const response = productTransformerAdmin.producttransformAddressDetails(existingProduct);
-        const productPriceList = productTransformerAdmin.productPriceListTransformDetails(productPriceData)
+        const productPriceList = productTransformerAdmin.productPriceListTransformData(productPriceData)
         return helper.success(res,res.__("productFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,productPriceList})
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
