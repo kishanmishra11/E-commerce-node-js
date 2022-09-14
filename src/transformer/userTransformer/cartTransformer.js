@@ -27,6 +27,7 @@ exports.cartTransformCreate = (data) => {
         cartId: data?._id ? data._id: "",
         userId:data?.userId ? data.userId:"",
         productId: data?.productId ? data.productId: "",
+        productPriceListId: data?.productPriceListId ? data.productPriceListId: "",
         quantity: data?.quantity ? data.quantity : "",
     };
 };

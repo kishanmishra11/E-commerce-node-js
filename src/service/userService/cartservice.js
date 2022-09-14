@@ -36,7 +36,17 @@ exports.cartlistService= async (data) => {
                     foreignField: "_id",
                     as: "subCategoryData",
                 },
-            });
+            },
+            {
+                $lookup: {
+                    from: "productPriceList",
+                    localField: "productId",
+                    foreignField: "productId",
+                    as: "colorPrice"
+                }
+            },
+
+            );
         if(data.userType === "prime"){
             pipeline.push(
                 {
@@ -85,6 +95,7 @@ exports.cartlistService= async (data) => {
                     productImage: {$arrayElemAt: ["$productData.productImage", 0]},
                     productPrice: {$arrayElemAt: ["$productData.productPrice", 0]},
                     totalPrice: {$multiply: [{$arrayElemAt: ["$productData.productPrice", 0]}, "$quantity"]},
+                    productPriceListId:1,
                     },
                 },
 

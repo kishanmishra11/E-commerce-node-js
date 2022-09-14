@@ -8,6 +8,7 @@ const Cart = require('../../../model/cart');
 const deliveryCharge = require('../../../model/config');
 const product = require('../../../model/product');
 const userInfo = require('../../../model/users');
+const productPriceList = require('../../../model/productPriceList');
 const subOrderTransformer = require('../../../transformer/userTransformer/subOrderTransformer');
 const subOrderCreateTransformer = require('../../../transformer/userTransformer/subOrderCreateTransformer');
 const orderTransformerUser = require("../../../transformer/userTransformer/orderTransformer");
@@ -54,6 +55,7 @@ exports.createOrder = async (req,res)=>{
         if (req.user.userType === "prime"){
             delivery.deliveryCharge = 0
         }
+
         const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id,promoDiscount: promoDiscount,deliveryCharge:delivery.deliveryCharge,userType: req.user.userType});
 
         let data= {
@@ -71,17 +73,25 @@ exports.createOrder = async (req,res)=>{
         const orderData = orderTransformerUser.orderTransformCreateUser(createOrder);
 
 
+
         const subOrder = await cartlistService.cartlistService({userId: req.user._id});
         let arr=[];
         for(let element of subOrder){
             let subOrdering = new subOrderModel();
             subOrdering.orderId = createOrder._id;
             subOrdering.productId = element.productId;
+            subOrdering.productPriceListId = element.productPriceListId;
             subOrdering.quantity = element.quantity;
             subOrdering.discountedPrice = element.discountedPrice;
             const abc = await subOrdering.save();
             arr.push(abc);
+
+            let checkStock = await productPriceList.findOne({_id:abc.productPriceListId, productId:abc.productId});
+            let stockInfo = checkStock.stock - abc.quantity
+            let updateStock = await productPriceList.findOneAndUpdate({_id:abc.productPriceListId, productId:abc.productId},{$set: {stock: stockInfo}}, {new: true})
         }
+
+
         if (req.user._id) {reqParam.userId = req.user._id};
         if(reqParam.userId) {
             await Cart.deleteMany({userId: reqParam.userId, status: {$ne: 3}});

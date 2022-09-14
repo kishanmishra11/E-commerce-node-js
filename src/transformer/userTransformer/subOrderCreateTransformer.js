@@ -2,6 +2,7 @@ exports.transformSubOrder = (data) => {
     return {
         orderId: data?.orderId ? data.orderId: "",
         productId: data?.productId ? data.productId : "",
+        productPriceListId: data?.productPriceListId ? data.productPriceListId : "",
         quantity: data?.quantity ? data.quantity : 0,
         discountedPrice: data?.discountedPrice ? data.discountedPrice : 0,
         status: data?.status ? data.status : 0,

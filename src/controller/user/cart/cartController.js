@@ -4,6 +4,7 @@ const applyPromoCode = require('../../../model/applyPromoCode');
 const promoCode = require('../../../model/promoCode');
 const deliveryCharge = require('../../../model/config');
 const productModel = require('../../../model/product');
+const productPriceList = require('../../../model/productPriceList');
 const CartTransformer = require('../../../transformer/userTransformer/cartTransformer');
 const cartlistService = require('../../../service/userService/cartservice');
 const { cartValidation } = require("../../../validation/userValidation/cartValidation");
@@ -24,6 +25,7 @@ const{
 exports.createCart =  async(req,res)=>{
     try {
         //set language
+        let reqParam = req.body;
         const lang = req.header('language')
         if(lang) {req.setLocale(lang)}
         //joi validation
@@ -31,6 +33,9 @@ exports.createCart =  async(req,res)=>{
         if(validationMessage) {
             return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
         }
+        let checkStock = await productPriceList.findOne({productId:reqParam.productId, _id:reqParam.productPriceListId})
+        if(checkStock.stock <= 0)
+            return helper.success(res, res.__("productOutOfStock"), META_STATUS_0, SUCCESSFUL);
 
         let charge = await deliveryCharge.findOne({userId: req.user._id });
         if (req.user.userType === "prime"){

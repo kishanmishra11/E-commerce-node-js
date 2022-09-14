@@ -109,5 +109,6 @@
 	"youCanNotCancelOrder": "you Can Not Cancel Order",
 	"dataNotFound": "data Not Found",
 	"deliveryChargeUpdatedSuccessfully": "delivery Charge Updated Successfully",
-	"productColorAlreadyExists": "productColorAlreadyExists"
+	"productColorAlreadyExists": "productColorAlreadyExists",
+	"productOutOfStock": "productOutOfStock"
 }
