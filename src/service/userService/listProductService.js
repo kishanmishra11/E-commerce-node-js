@@ -146,6 +146,39 @@ exports.productlistService= async (data) => {
             },
             {
                 $addFields: {
+                    priceList: {
+                        $map: {
+                            input: "$colorPrice",
+                            as: "colour",
+                            in: {
+                                $cond: [
+                                    {
+                                        $eq: ["$$colour.price", {$min: "$colorPrice.price"}]
+                                    },
+                                    {
+                                        $mergeObjects: [
+                                            "$$colour",
+                                            {
+                                                "isSmallest": true
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        $mergeObjects: [
+                                            "$$colour",
+                                            {
+                                                "isSmallest": false
+                                            }
+                                        ]
+                                    },
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $addFields: {
                     colorPrice:{
                         $map: {
                             input: "$stock",
@@ -204,14 +237,40 @@ exports.productlistService= async (data) => {
                     productImage: 1,
                     status: 1,
                     inStock:1,
+                    isSmallest:1,
                     discountedPrice:1,
-                    colorPrice: 1,
+                    colorPrice: {
+                        $map: {
+                            input: "$colorPrice",
+                            as: "one",
+                            in: {
+                                $mergeObjects: [
+                                    "$$one",
+                                    {
+                                        $arrayElemAt: [
+                                            {
+                                                $filter: {
+                                                    input: "$priceList",
+                                                    as: "two",
+                                                    cond: {
+                                                        $eq: [
+                                                            "$$two._id",
+                                                            "$$one._id"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            0
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
 
                 }
             },
         );
-
-
 
 
         const result = await product.aggregate(pipeline);

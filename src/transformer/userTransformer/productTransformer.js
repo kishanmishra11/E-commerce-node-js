@@ -49,6 +49,7 @@ exports.productPriceListTransformUser =  (data) => {
         discountedPrice: data?.discountedPrice ? data.discountedPrice: 0,
         status: data?.status ? data.status : 0,
         inStock: data?.inStock ? data.inStock :false,
+        isSmallest: data?.isSmallest ? data.isSmallest :false,
     };
 };
 

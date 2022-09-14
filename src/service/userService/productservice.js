@@ -12,6 +12,14 @@ exports.productListService= async (data) => {
                     _id: ObjectId(data.productId),
                 }
             },
+            {
+                $lookup: {
+                    from: "category",
+                    localField: "categoryId",
+                    foreignField: "_id",
+                    as: "categoryData"
+                }
+            },
 
             {
                 $lookup: {
@@ -21,15 +29,7 @@ exports.productListService= async (data) => {
                     as: "subCategoryData"
                 }
             },
-            
-            {
-                $lookup: {
-                    from: "category",
-                    localField: "categoryId",
-                    foreignField: "_id",
-                    as: "categoryData"
-                }
-            },
+
             {
                 $lookup: {
                     from: "cart",
@@ -103,6 +103,7 @@ exports.productListService= async (data) => {
                         }
                     }
                 },
+
             },
             {
                 $addFields: {
@@ -141,6 +142,39 @@ exports.productListService= async (data) => {
             },
             {
                 $addFields: {
+                    priceList: {
+                        $map: {
+                            input: "$colorPrice",
+                            as: "colour",
+                            in: {
+                                $cond: [
+                                    {
+                                        $eq: ["$$colour.price", {$min: "$colorPrice.price"}]
+                                    },
+                                    {
+                                        $mergeObjects: [
+                                            "$$colour",
+                                            {
+                                                "isSmallest": true
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        $mergeObjects: [
+                                            "$$colour",
+                                            {
+                                                "isSmallest": false
+                                            }
+                                        ]
+                                    },
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $addFields: {
                     colorPrice:{
                         $map: {
                             input: "$stock",
@@ -170,7 +204,8 @@ exports.productListService= async (data) => {
                         }
                     },
                 }
-            }
+            },
+
         );
 
         pipeline.push(
@@ -197,32 +232,41 @@ exports.productListService= async (data) => {
                     status:1,
                     inStock:1,
                     discountedPrice:1,
-                    colorPrice: 1,
-
+                    priceList:1,
+                    isSmallest:1,
+                    colorPrice: {
+                        $map: {
+                            input: "$colorPrice",
+                            as: "one",
+                            in: {
+                                $mergeObjects: [
+                                    "$$one",
+                                    {
+                                        $arrayElemAt: [
+                                            {
+                                                $filter: {
+                                                    input: "$priceList",
+                                                    as: "two",
+                                                    cond: {
+                                                        $eq: [
+                                                            "$$two._id",
+                                                            "$$one._id"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            0
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 }
             },
 
         );
-        // if(data.userType === "prime"){
-        //     pipeline.push(
-        //         {
-        //             $addFields:{
-        //                 productDiscount:{ $sum:["$regularDiscount", "$primeDiscount"] },
-        //                 discountedPrice:{ $subtract: ["$productPrice",{$divide:[({$multiply:["$productPrice", { $sum:["$regularDiscount", "$primeDiscount"] }]}), 100]}] },
-        //             }
-        //         }
-        //     )
-        // }else{
-        //     pipeline.push(
-        //         {
-        //             $addFields:{
-        //                 productDiscount: "$regularDiscount",
-        //                 discountedPrice:{ $subtract: ["$productPrice",{$divide:[({$multiply:["$productPrice", "$regularDiscount"]}), 100]}] },
-        //             }
-        //         }
-        //     )
-        //
-        // }
+
 
 
         const result = await product.aggregate(pipeline);
