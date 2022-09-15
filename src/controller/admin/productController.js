@@ -69,10 +69,10 @@ exports.addEditProduct = async (req,res) => {
                 productPriceData = await productPriceListModel.findOne({colorName: reqParam.colorName});
                 if (productPriceData) return helper.success(res, res.__("productColorAlreadyExists"), META_STATUS_0, SUCCESSFUL);
             } else {
-                    productPriceData2 = await productPriceListModel.findOne({productId:reqParam.productId,colorName: reqParam.colorName});
-                    if (productPriceData2) return helper.success(res, res.__("productColorAlreadyExists"), META_STATUS_0, SUCCESSFUL);
+                productPriceData2 = await productPriceListModel.findOne({productId:reqParam.productId,colorName: reqParam.colorName});
+                if (productPriceData2) return helper.success(res, res.__("productColorAlreadyExists"), META_STATUS_0, SUCCESSFUL);
+                productPriceData = new productPriceListModel();
             }
-            productPriceData = new productPriceListModel();
 
         } else  {
             if(req.file && req.file.filename) reqParam.productImage = req.file.filename;
@@ -82,8 +82,16 @@ exports.addEditProduct = async (req,res) => {
             if(productExist) return helper.success(res, res.__("productAlreadyExists"), META_STATUS_0, SUCCESSFUL);
 
             productExist = new Product();
-        }
 
+            if (reqParam.productPriceListId) {
+                productPriceData = await productPriceListModel.findOne({colorName: reqParam.colorName});
+                if (productPriceData) return helper.success(res, res.__("productColorAlreadyExists"), META_STATUS_0, SUCCESSFUL);
+            } else {
+                productPriceData2 = await productPriceListModel.findOne({productId:reqParam.productId,colorName: reqParam.colorName});
+                if (productPriceData2) return helper.success(res, res.__("productColorAlreadyExists"), META_STATUS_0, SUCCESSFUL);
+                productPriceData = new productPriceListModel();
+            }
+        }
 
         productExist.categoryId = req.body.categoryId ? reqParam.categoryId : productExist.categoryId;
         productExist.subCategoryId = req.body.subCategoryId ? reqParam.subCategoryId : productExist.subCategoryId;
@@ -97,11 +105,16 @@ exports.addEditProduct = async (req,res) => {
         productExist.productImage = req.body.productImage ? reqParam.productImage : productExist.productImage;
         productExist.status = req.body.status ? reqParam.status : productExist.status;
 
-        productPriceData.productId = req.body.productId ? reqParam.productId : productPriceData.productId;
+
+        if(reqParam.productId){
+            productPriceData.productId = req.body.productId ? reqParam.productId : productPriceData.productId;
+        }else{
+            productPriceData.productId = productExist._id
+        }
         productPriceData.colorName = req.body.colorName ? reqParam.colorName : productPriceData.colorName;
-        productPriceData.stoke = req.body.stoke ? reqParam.stoke : productPriceData.stoke;
+        productPriceData.stock = req.body.stock ? reqParam.stock : productPriceData.stock;
         productPriceData.price = req.body.price ? reqParam.price : productPriceData.price;
-        productPriceData.regularDiscountedPrice = productPriceData.price -((productPriceData.price * productExist.regularDiscount)/100)
+        productPriceData.regularDiscountedPrice = productPriceData.price -((productPriceData.price * productExist.regularDiscount)/100),
         productPriceData.primeDiscountedPrice = productPriceData.price -((productPriceData.price * (productExist.regularDiscount + productExist.primeDiscount))/100),
         productPriceData.status = req.body.status ? reqParam.status : productPriceData.status;
 
@@ -110,7 +123,7 @@ exports.addEditProduct = async (req,res) => {
         await productPriceData.save();
 
         const response = productTransformerAdmin.producttransformAddressDetails(productExist);
-        const productPriceList = productTransformerAdmin.productPriceListTransformData(productPriceData)
+        const productPriceList = productTransformerAdmin.productlisttransformAddressDetails(productPriceData)
 
         if (req.body.productId) {
             return helper.success(res,res.__("productUpdatedSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,productPriceList})

@@ -110,7 +110,7 @@ exports.subAdmin = {
     subcategory:['subcategory','add-subcategory','edit-subcategory'],
     product:['product','add-edit-product'],
     user:['user','view-user','add-edit-user'],
-    promoCode:['promocode','add-edit-promocode','view-promocode']
+    promoCode:['promocode','add-edit-promocode','view-promocode'],
 }
 
 

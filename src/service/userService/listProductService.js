@@ -4,6 +4,31 @@ let ObjectId = require("mongodb").ObjectId
 exports.productlistService= async (data) => {
     try{
         let pipeline = [];
+
+        if (data.categoryId) {
+            pipeline.push({
+                $match: {
+                    categoryId: ObjectId(data.categoryId),
+                }
+            })
+        };
+
+        if(data.subCategoryId) {
+            if (data.subCategoryId.length > 0) {
+                let values = data.subCategoryId
+                let ids = []
+                for (let i = 0; i < values.length; i++) {
+                    let newValue = ObjectId(values[i])
+                    ids.push(newValue)
+                }
+                pipeline.push({
+                    $match: {
+                        subCategoryId: {$in: ids},
+                    }
+                })
+            }
+        };
+
         pipeline.push(
 
             {

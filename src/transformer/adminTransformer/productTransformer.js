@@ -75,7 +75,6 @@ exports.productlisttransformAddressDetails = (arrayData,language) => {
 };
 
 
-
 exports.productPriceListTransform =  (data) => {
     return {
         productPriceListId: data?._id ? data._id: "",
@@ -84,6 +83,7 @@ exports.productPriceListTransform =  (data) => {
         colorName: data?.colorName ? data.colorName : "",
         regularDiscountedPrice: data?.regularDiscountedPrice ? data.regularDiscountedPrice: 0,
         primeDiscountedPrice: data?.primeDiscountedPrice ? data.primeDiscountedPrice: 0,
+        stock: data?.stock ? data.stock: 0,
         status: data?.status ? data.status : 0
     };
 };
@@ -104,7 +104,7 @@ exports.productPriceListTransformData = (arrayData) => {
     let data = [];
     if (arrayData && arrayData.length > 0) {
         arrayData.forEach((a) => {
-            data.push(this.producttransformaddress(a));
+            data.push(this.productPriceListTransform(a));
         });
     }
     arrayData = data;

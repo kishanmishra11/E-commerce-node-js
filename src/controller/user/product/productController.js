@@ -27,7 +27,7 @@ exports.listProduct = async (req,res)=>{
         let userId = req?.user?._id ? req.user._id : undefined;
         let userData = userId ? await userModel.findOne({_id: userId, status: 1}) : undefined;
         let userType = userData ? userData.userType : undefined;
-        const responseData = await listProductService.productlistService({userId: userId,userType: userType});
+        const responseData = await listProductService.productlistService({userId: userId,userType: userType, categoryId:reqParam.categoryId,subCategoryId:reqParam.subCategoryId});
         const response = productTransformer.listTransformProductDetailsUser(responseData)
         return helper.success(res,res.__("productListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response);
     }catch(e){
