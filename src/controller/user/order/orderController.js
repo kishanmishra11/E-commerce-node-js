@@ -106,6 +106,7 @@ exports.createOrder = async (req,res)=>{
         await orderTrack.save();
 
         const subOrderData = subOrderCreateTransformer.listTransformSubOrderDetails(arr);
+        console.log("subOrderData",subOrderData)
         return helper.success(res,res.__("orderCreatedSuccessfully"),META_STATUS_1,SUCCESSFUL, {orderData,subOrderData});
     }
     catch(e) {
@@ -137,7 +138,7 @@ exports.viewOrder = async (req,res) => {
         let existingOrder = await order.findOne({_id: reqParam.orderId, status: {$ne: 3}});
         // let subData = await subOrderModel.find({orderId: reqParam.orderId});
         if(!existingOrder) return helper.success(res, res.__("orderNotFound"), META_STATUS_0, SUCCESSFUL);
-        const subData = await subOrderService.subOrderService({orderId:reqParam.orderId})
+        const subData = await subOrderService.subOrderService({orderId:reqParam.orderId,userType: req.user.userType})
         const response = orderTransformerUser.transformOrderDetailsUser(existingOrder);
         const subOrderData = subOrderTransformer.listTransformSubOrderDetails(subData);
         return helper.success(res,res.__("orderFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,subOrderData})

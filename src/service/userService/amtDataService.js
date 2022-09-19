@@ -20,20 +20,45 @@ exports.amtDataService = async (data) => {
                 },
             },
             {
+                $lookup: {
+                    from: "productPriceList",
+                    localField: "productId",
+                    foreignField: "productId",
+                    as: "colorPrice"
+                }
+            },
+            {
+                $project:{
+                    price:{$arrayElemAt: ["$colorPrice.price", 0]},
+                    regularDiscountedPrice:{$arrayElemAt: ["$colorPrice.regularDiscountedPrice", 0]},
+                    primeDiscountedPrice:{$arrayElemAt: ["$colorPrice.primeDiscountedPrice", 0]},
+                    quantity:1,
+                }
+            },
+
+            {
                 $addFields:{
                     deliveryCharge: data.deliveryCharge,
                 }
             },
-
             {
-                $addFields:{
-                    "totalPrice": {$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },"$quantity"]},
-                }
+                $addFields: {
+                    totalPrice: {
+                        $cond: {
+                            if: {
+                                $eq: [data.userType, "prime"]
+                            },
+                            then: {$multiply:["$primeDiscountedPrice","$quantity"]},
+                            else:  {$multiply:["$regularDiscountedPrice","$quantity"]},
+                        },
+                    },
+                },
             },
 
-            {
-                $unwind: '$productData'
-            },
+            // {
+            //     $unwind: '$productData'
+            // },
+
             {
                 $addFields: {
                     discount: {
@@ -41,12 +66,15 @@ exports.amtDataService = async (data) => {
                             if: {
                                 $eq: [data.userType, "prime"]
                             },
-                            then: {$divide: [{$multiply: ["$productData.productPrice", "$productData.totalPrimeDiscount", "$quantity"]}, 100]},
-                            else: {$divide: [{$multiply: ["$productData.productPrice", "$productData.regularDiscount", "$quantity"]}, 100]}
+                            then: {$multiply:[{$subtract: ["$price", "$primeDiscountedPrice"]},"$quantity"]},
+                            else: {$multiply:[{$subtract: ["$price", "$regularDiscountedPrice"]},"$quantity"]},
+                            // then: {$divide: [{$multiply: [{$multiply: ["$colorPrice.price", "$productData.totalPrimeDiscount"]}, "$quantity"]}, 100]},
+                            // else: {$divide: [{$multiply: [{$multiply: ["$colorPrice.price", "$productData.regularDiscount"]}, "$quantity"]}, 100]},
                         },
                     },
                 },
             },
+
             {
                 $group:{
                     _id: "$userId",
@@ -67,7 +95,8 @@ exports.amtDataService = async (data) => {
 
                 }
             },
-        )
+        );
+
 
         const result = await Cart.aggregate(pipeline);
         return result;

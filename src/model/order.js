@@ -33,6 +33,10 @@ const orderSchema = new mongoose.Schema({
         default: "confirmed",
         enum: ["confirmed", "dispatched", "out for delivery", "delivered" , "cancelled"]
     },
+    paymentStatus:{
+        type: Boolean,
+        default: false,
+    }
 
 },
     { collection: "order", timestamps: true})

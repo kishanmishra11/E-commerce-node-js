@@ -114,8 +114,8 @@ exports.addEditProduct = async (req,res) => {
         productPriceData.colorName = req.body.colorName ? reqParam.colorName : productPriceData.colorName;
         productPriceData.stock = req.body.stock ? reqParam.stock : productPriceData.stock;
         productPriceData.price = req.body.price ? reqParam.price : productPriceData.price;
-        productPriceData.regularDiscountedPrice = productPriceData.price -((productPriceData.price * productExist.regularDiscount)/100),
-        productPriceData.primeDiscountedPrice = productPriceData.price -((productPriceData.price * (productExist.regularDiscount + productExist.primeDiscount))/100),
+        productPriceData.regularDiscountedPrice = productPriceData.price -((productPriceData.price * productExist.regularDiscount)/100);
+        productPriceData.primeDiscountedPrice = productPriceData.price -((productPriceData.price * productExist.totalPrimeDiscount)/100);
         productPriceData.status = req.body.status ? reqParam.status : productPriceData.status;
 
 

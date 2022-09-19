@@ -11,6 +11,7 @@ exports.transformOrderUser = (data) => {
         promoCodeId: data?.promoCodeId ? data.promoCodeId : 0,
         status: data?.status ? data.status : 0,
         orderStatus: data?.orderStatus ? data.orderStatus : 0,
+        paymentStatus: data?.paymentStatus ? data.paymentStatus : false,
     };
 };
 
@@ -26,7 +27,7 @@ exports.orderTransformCreateUser = (data) => {
         addressId: data?.addressId ? data.addressId : 0,
         promoCodeId: data?.promoCodeId ? data.promoCodeId : 0,
         status: data?.status ? data.status : 0,
-        orderStatus: data?.orderStatus ? data.orderStatus : 0,
+        paymentStatus: data?.paymentStatus ? data.paymentStatus : false,
     };
 };
 

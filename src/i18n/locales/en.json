@@ -110,5 +110,6 @@
 	"dataNotFound": "data Not Found",
 	"deliveryChargeUpdatedSuccessfully": "delivery Charge Updated Successfully",
 	"productColorAlreadyExists": "product Color Already Exists",
-	"productOutOfStock": "product Out Of Stock"
+	"productOutOfStock": "product Out Of Stock",
+	"successful": "successful"
 }

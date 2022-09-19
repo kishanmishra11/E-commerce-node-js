@@ -51,10 +51,10 @@ exports.cartlistService= async (data) => {
             pipeline.push(
                 {
                     $addFields:{
-                        productDiscount:{$divide:[({$multiply:[ {$arrayElemAt:["$productData.totalPrimeDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},
-                        discountedPrice:{$subtract:[{$arrayElemAt:["$productData.productPrice" , 0] },{$divide:[({$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },{$arrayElemAt:["$productData.totalPrimeDiscount",0]}]}),100]}]},
-                        totalDiscount: { $multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.totalPrimeDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},"$quantity"]},
-                        finalPrice:{$subtract:[{$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },"$quantity"]},{ $multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.totalPrimeDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},"$quantity"]}]},
+                        productDiscount:{$divide:[({$multiply:[ {$arrayElemAt:["$productData.totalPrimeDiscount" , 0] },{$arrayElemAt:["$colorPrice.price",0]}]}),100]},
+                        discountedPrice:{$multiply:[{$arrayElemAt:["$colorPrice.primeDiscountedPrice", 0] },"$quantity"]},
+                        totalDiscount: {$multiply:[{$divide:[({$multiply:[ {$arrayElemAt:["$productData.totalPrimeDiscount" , 0] },{$arrayElemAt:["$colorPrice.price",0]}]}),100]},"$quantity"]},
+                        finalPrice:{$subtract:[{$multiply:[{$arrayElemAt:["$colorPrice.primeDiscountedPrice" , 0] },"$quantity"]},{ $multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.totalPrimeDiscount" , 0] },{$arrayElemAt:["$colorPrice.primeDiscountedPrice",0]}]}),100]},"$quantity"]}]},
                     }
                 }
             )
@@ -62,10 +62,10 @@ exports.cartlistService= async (data) => {
             pipeline.push(
                 {
                     $addFields:{
-                        productDiscount:{$divide:[({$multiply:[{$arrayElemAt:["$productData.regularDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},
-                        discountedPrice:{$subtract:[{$arrayElemAt:["$productData.productPrice" , 0] },{$divide:[({$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },{$arrayElemAt:["$productData.regularDiscount",0]}]}),100]}]},
-                        totalDiscount: { $multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.regularDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},"$quantity"]},
-                        finalPrice:{$subtract:[{$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },"$quantity"]},{ $multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.regularDiscount" , 0] },{$arrayElemAt:["$productData.productPrice",0]}]}),100]},"$quantity"]}]},
+                        productDiscount:{$divide:[({$multiply:[{$arrayElemAt:["$productData.regularDiscount" , 0] },{$arrayElemAt:["$colorPrice.price",0]}]}),100]},
+                        discountedPrice:{$multiply:[{$arrayElemAt:["$colorPrice.regularDiscountedPrice", 0] },"$quantity"]},
+                        totalDiscount: {$multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.regularDiscount" , 0] },{$arrayElemAt:["$colorPrice.price",0]}]}),100]},"$quantity"]},
+                        finalPrice:{$subtract:[{$multiply:[{$arrayElemAt:["$colorPrice.regularDiscountedPrice" , 0] },"$quantity"]},{ $multiply:[{$divide:[({$multiply:[{$arrayElemAt:["$productData.regularDiscount" , 0] },{$arrayElemAt:["$colorPrice.regularDiscountedPrice",0]}]}),100]},"$quantity"]}]},
 
                     }
                 }
@@ -93,8 +93,8 @@ exports.cartlistService= async (data) => {
                     productName: {$arrayElemAt: ["$productData.productName", 0]},
                     productDescription: {$arrayElemAt: ["$productData.productDescription", 0]},
                     productImage: {$arrayElemAt: ["$productData.productImage", 0]},
-                    productPrice: {$arrayElemAt: ["$productData.productPrice", 0]},
-                    totalPrice: {$multiply: [{$arrayElemAt: ["$productData.productPrice", 0]}, "$quantity"]},
+                    productPrice: {$arrayElemAt: ["$colorPrice.price", 0]},
+                    totalPrice: {$multiply: [{$arrayElemAt: ["$colorPrice.price", 0]}, "$quantity"]},
                     productPriceListId:1,
                     },
                 },

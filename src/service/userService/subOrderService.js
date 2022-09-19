@@ -19,6 +19,41 @@ exports.subOrderService = async (data) => {
                     as: "productData",
                 },
             },
+            {
+                $lookup: {
+                    from: "productPriceList",
+                    localField: "productId",
+                    foreignField: "productId",
+                    as: "colorPrice"
+                }
+            }
+        );
+
+        if(data.userType === "prime"){
+            pipeline.push(
+                {
+                    $addFields:{
+                        productPrice:{ $arrayElemAt: [ "$colorPrice.price", 0] },
+                        discountedPrice: {$multiply:[{$arrayElemAt:["$colorPrice.primeDiscountedPrice", 0] },"$quantity"]},
+                        totalPrice:{$multiply:[{$arrayElemAt:["$colorPrice.price", 0] },"$quantity"]},
+                    }
+                }
+            )
+        }else{
+            pipeline.push(
+                {
+                    $addFields:{
+                        productPrice:{ $arrayElemAt: [ "$productData.price", 0] },
+                        discountedPrice: {$multiply:[{$arrayElemAt:["$colorPrice.regularDiscountedPrice", 0] },"$quantity"]},
+                        totalPrice:{$multiply:[{$arrayElemAt:["$colorPrice.price", 0] },"$quantity"]},
+                    }
+                }
+            )
+
+        }
+
+
+        pipeline.push(
 
             {
                 $project: {
@@ -28,10 +63,9 @@ exports.subOrderService = async (data) => {
                     productId:1,
                     productName:{ $arrayElemAt: [ "$productData.productName", 0] },
                     productImage:{ $arrayElemAt: [ "$productData.productImage", 0] },
-                    productPrice:{ $arrayElemAt: [ "$productData.productPrice", 0] },
-                    discountedPrice:{$subtract:[{$arrayElemAt:["$productData.productPrice" , 0] },{$divide:[({$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },{$arrayElemAt:["$productData.productDiscount",0]}]}),100]}]},
-                    totalPrice:{$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },"$quantity"]},
-                    totalDiscountedPrice:{$multiply:[{$subtract:[{$arrayElemAt:["$productData.productPrice" , 0] },{$divide:[({$multiply:[{$arrayElemAt:["$productData.productPrice" , 0] },{$arrayElemAt:["$productData.productDiscount",0]}]}),100]}]},"$quantity"]},
+                    productPrice:1,
+                    discountedPrice:1,
+                    totalPrice:1,
                     status:1,
                 },
             },

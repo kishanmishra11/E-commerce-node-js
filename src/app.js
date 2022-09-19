@@ -1,4 +1,5 @@
 const express = require("express");
+const Stripe = require('stripe');
 const cors = require('cors')
 require("./db/conn");
 const {PORT} = require("../config/key")
@@ -19,9 +20,10 @@ app.listen(port, ()=>{
     console.log(`connection is established on port number ${PORT}`);
 })
 
+
+
 app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "ejs");
-
 
 app.use(express.json());
 app.use(cors({ origin: '*' }));
