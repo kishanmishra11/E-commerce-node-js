@@ -67,6 +67,7 @@ exports.createOrder = async (req,res)=>{
             finalAmount:amtDataServiceData[0].finalAmount,
             promoCodeId: verifyUser?.promoCodeId ? verifyUser.promoCodeId : null,
             addressId:reqParam.addressId
+
         }
         const ordering  = new order(data);
         const createOrder = await ordering.save();
@@ -80,6 +81,8 @@ exports.createOrder = async (req,res)=>{
             let subOrdering = new subOrderModel();
             subOrdering.orderId = createOrder._id;
             subOrdering.productId = element.productId;
+            subOrdering.productPrice = element.productPrice;
+            subOrdering.productName = element.productName;
             subOrdering.productPriceListId = element.productPriceListId;
             subOrdering.quantity = element.quantity;
             subOrdering.discountedPrice = element.discountedPrice;
@@ -106,7 +109,7 @@ exports.createOrder = async (req,res)=>{
         await orderTrack.save();
 
         const subOrderData = subOrderCreateTransformer.listTransformSubOrderDetails(arr);
-        console.log("subOrderData",subOrderData)
+        // console.log("subOrderData",subOrderData)
         return helper.success(res,res.__("orderCreatedSuccessfully"),META_STATUS_1,SUCCESSFUL, {orderData,subOrderData});
     }
     catch(e) {

@@ -100,9 +100,7 @@ exports.payment = async (req,res)=> {
         const existingOrder = await order.findOne({_id: req.body.orderId});
         const user = await userInfo.findOne({_id: existingOrder.userId});
         const subOrderInfo = await subOrder.findOne({orderId: req.body.orderId});
-        console.log("subOrder",subOrderInfo)
         const productInfo = await productModel.findOne({_id: subOrderInfo.productId});
-        console.log("productInfo",productInfo)
 
         const product = await stripe.products.create({
             name: productInfo.productName,
@@ -114,28 +112,24 @@ exports.payment = async (req,res)=> {
             unit_amount: existingOrder.finalAmount,
             currency: 'inr',
             product: product.id,
-
         });
         console.log("price",price)
 
-        //create session
 
+        //create session
         const session = await stripe.checkout.sessions.create({
-            success_url: 'https://example.com/success',
+            success_url: 'http://localhost:3000/views/success',
             cancel_url: 'https://example.com/cancel',
             customer_email:user.email,
             line_items: [
                 {price: price.id, quantity: 100},
             ],
             mode: 'payment',
-
-
-
         }).then((session) => {
             // res.status().send("session",session.url)
             return helper.success(res,res.__("successful"),META_STATUS_1,200,session.url)
         })
-        // console.log("session",session)
+        const updateStatus = await order.findOneAndUpdate({orderId: req.body.orderId},{$set:{paymentStatus: true}})
     }
     catch(e){
         console.log(e)

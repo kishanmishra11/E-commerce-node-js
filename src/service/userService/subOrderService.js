@@ -33,7 +33,6 @@ exports.subOrderService = async (data) => {
             pipeline.push(
                 {
                     $addFields:{
-                        productPrice:{ $arrayElemAt: [ "$colorPrice.price", 0] },
                         discountedPrice: {$multiply:[{$arrayElemAt:["$colorPrice.primeDiscountedPrice", 0] },"$quantity"]},
                         totalPrice:{$multiply:[{$arrayElemAt:["$colorPrice.price", 0] },"$quantity"]},
                     }
@@ -43,7 +42,6 @@ exports.subOrderService = async (data) => {
             pipeline.push(
                 {
                     $addFields:{
-                        productPrice:{ $arrayElemAt: [ "$productData.price", 0] },
                         discountedPrice: {$multiply:[{$arrayElemAt:["$colorPrice.regularDiscountedPrice", 0] },"$quantity"]},
                         totalPrice:{$multiply:[{$arrayElemAt:["$colorPrice.price", 0] },"$quantity"]},
                     }
@@ -63,7 +61,7 @@ exports.subOrderService = async (data) => {
                     productId:1,
                     productName:{ $arrayElemAt: [ "$productData.productName", 0] },
                     productImage:{ $arrayElemAt: [ "$productData.productImage", 0] },
-                    productPrice:1,
+                    productPrice:{ $arrayElemAt: [ "$colorPrice.price", 0] },
                     discountedPrice:1,
                     totalPrice:1,
                     status:1,

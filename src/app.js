@@ -33,6 +33,10 @@ app.use(demorouter);
 app.use(express.static(publicDirectory));
 
 
+app.get('/views/success', (req, res) => {
+    res.render('success')
+})
+
 const adminRouter = require('../../api2/src/routes/admin/adminRoute');
 app.use("/admin/admin",adminRouter);
 
