@@ -49,3 +49,15 @@ exports.listtransformCartDetails = (arrayData) => {
     arrayData = data;
     return arrayData;
 };
+
+
+exports.listtransformCartDetailsArray = (arrayData) => {
+    let data = [];
+    if (arrayData && arrayData.length > 0) {
+        arrayData.forEach((a) => {
+            data.push(this.cartTransformCreate(a));
+        });
+    }
+    arrayData = data;
+    return arrayData;
+};

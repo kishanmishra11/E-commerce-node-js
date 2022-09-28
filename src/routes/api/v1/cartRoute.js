@@ -10,4 +10,6 @@ cartRouter.post("/cart",checkAuth.userAuth,controller.createCart);
 
 cartRouter.post("/list-cart",checkAuth.userAuth, controller.listCart);
 
+cartRouter.post("/reorder",checkAuth.userAuth,controller.reorder);
+
 module.exports = cartRouter;
