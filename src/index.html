@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Free chat app</title>
+    <link href="/public/style.css" rel="stylesheet">
+</head>
+
+<body>
+<section class="chat__section">
+    <div class="brand">
+        <img alt="" height="40" src="/public/wassup.png">
+        <h1>Free Chat</h1>
+    </div>
+    <div class="message__area"></div>
+    <div>
+        <textarea cols="30" id="textarea" placeholder="Write a message..." rows="1"></textarea>
+    </div>
+</section>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/public/client.js"></script>
+</body>
+
+</html>
