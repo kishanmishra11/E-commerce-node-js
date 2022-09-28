@@ -16,4 +16,6 @@ orderRouter.post("/track-order",checkAuth.userAuth, controller.trackOrder);
 
 orderRouter.post("/payment",stripeController.payment);
 
+orderRouter.post("/hello-world",controller.helloWorld);
+
 module.exports = orderRouter;

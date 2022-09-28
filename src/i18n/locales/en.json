@@ -111,5 +111,9 @@
 	"deliveryChargeUpdatedSuccessfully": "delivery Charge Updated Successfully",
 	"productColorAlreadyExists": "product Color Already Exists",
 	"productOutOfStock": "product Out Of Stock",
-	"successful": "successful"
+	"successful": "successful",
+	"ratingAddedSuccessfully": "rating Added Successfully",
+	"ratingAlreadyExist": "rating Already Exist",
+	"youHaveNotPurchasedThisProduct": "you Have Not Purchased This Product",
+	"ratingListedSuccessfully": "rating Listed Successfully"
 }

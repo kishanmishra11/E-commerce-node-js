@@ -5,6 +5,8 @@ const promoCode = require('../../../model/promoCode');
 const deliveryCharge = require('../../../model/config');
 const productModel = require('../../../model/product');
 const productPriceList = require('../../../model/productPriceList');
+const subOrderModel = require('../../../model/subOrder');
+const orderModel = require('../../../model/order');
 const CartTransformer = require('../../../transformer/userTransformer/cartTransformer');
 const cartlistService = require('../../../service/userService/cartservice');
 const { cartValidation } = require("../../../validation/userValidation/cartValidation");
@@ -34,7 +36,7 @@ exports.createCart =  async(req,res)=>{
             return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
         }
         let checkStock = await productPriceList.findOne({productId:reqParam.productId, _id:reqParam.productPriceListId})
-        if(checkStock.stock <= 0)
+        if(checkStock.stock <= 0 || checkStock.stock === null )
             return helper.success(res, res.__("productOutOfStock"), META_STATUS_0, SUCCESSFUL);
 
         let charge = await deliveryCharge.findOne({userId: req.user._id });
@@ -92,6 +94,43 @@ exports.listCart = async (req,res)=>{
         const amountData = transformAmtData.listAmtDataDetails(amtDataServiceData);
         return helper.success(res,res.__("cartListedSuccessfully"),META_STATUS_1,SUCCESSFUL,{cartData,amountData})
     }catch(e){
+        console.log(e)
+        return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
+    }
+}
+
+//re order
+exports.reorder = async (req,res) => {
+    try {
+        let reqParam = req.body
+        let orderData = await subOrderModel.find({orderId:reqParam.orderId});
+        if(orderData.length === 0) return helper.success(res, res.__("orderNotFound"), META_STATUS_0, SUCCESSFUL);
+
+        let charge = await deliveryCharge.findOne({userId: req.user._id });
+        if (req.user.userType === "prime"){
+            charge.deliveryCharge = 0
+        }
+        let arr = [];
+
+        for (let a of orderData) {
+            let cartList = new Cart();
+                cartList.userId = req.user._id,
+                cartList.productId =  a.productId,
+                cartList.productPriceListId = a.productPriceListId,
+                cartList.quantity = a.quantity
+
+            const abc = await cartList.save();
+            arr.push(abc);
+
+            let checkStock = await productPriceList.findOne({_id:abc.productPriceListId, productId:abc.productId});
+            if(!checkStock) return helper.success(res, res.__("productOutOfStock"), META_STATUS_0, SUCCESSFUL);
+            let stockInfo = checkStock.stock - abc.quantity
+            let updateStock = await productPriceList.findOneAndUpdate({_id:abc.productPriceListId, productId:abc.productId},{$set: {stock: stockInfo}}, {new: true})
+        }
+            const response = CartTransformer.listtransformCartDetailsArray(arr);
+            return helper.success(res,res.__("orderCreatedSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
+    }
+    catch(e){
         console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }

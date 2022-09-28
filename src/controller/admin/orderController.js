@@ -27,6 +27,7 @@ exports.listOrderAdmin = async (req,res)=>{
         let orderList
         if (startDate) {
             startDate = new Date(reqParam.startDate)
+
             endDate = new Date(reqParam.endDate)
             orderList = await order.find({createdAt: {$gte: startDate, $lt: endDate}})
         } else {
@@ -35,6 +36,7 @@ exports.listOrderAdmin = async (req,res)=>{
         const response = await orderTransformerAdmin.listTransformOrderDetails(orderList)
         return helper.success(res,res.__("orderListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response);
     } catch(e){
+        console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }
@@ -66,9 +68,6 @@ exports.editOrderAdmin = async (req,res) => {
         let month = d.getMonth();
         let day = d.getDate();
         let expireDate = new Date(year + 1, month, day);
-
-
-
 
         let existingOrder = await order.findOne({_id: reqParam.orderId, status: {$ne: 3}});
         if (!existingOrder) return helper.success(res, res.__("orderNotFound"), 0, 200);
@@ -161,10 +160,6 @@ exports.editOrderAdmin = async (req,res) => {
         if(existingUser.superCoin > 200) {
             await userInfo.updateOne({_id: orderDetails.userId}, {$set: {superCoin: coinCount,userType: "prime", primeExpiryDate: expireDate}}, {new: true})
         }
-
-
-
-
         const response = trackOrderTransformerAdmin.transformTrackOrderDetails(orderTrack);
         return helper.success(res, res.__("orderTrackedSuccessfully"), 1, 200,response)
     }catch(e){

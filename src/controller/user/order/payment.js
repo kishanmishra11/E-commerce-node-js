@@ -124,12 +124,13 @@ exports.payment = async (req,res)=> {
             line_items: [
                 {price: price.id, quantity: 100},
             ],
-            mode: 'payment',
+            payment_method_types: ['card'],
+            mode: 'subscription',
         }).then((session) => {
             // res.status().send("session",session.url)
-            return helper.success(res,res.__("successful"),META_STATUS_1,200,session.url)
+            return helper.success(res,res.__("successful"),META_STATUS_1,SUCCESSFUL,session.url)
         })
-        const updateStatus = await order.findOneAndUpdate({orderId: req.body.orderId},{$set:{paymentStatus: true}})
+        const updateStatus = await order.findOneAndUpdate({_id: req.body.orderId},{$set:{paymentStatus: true}},{new:true})
     }
     catch(e){
         console.log(e)

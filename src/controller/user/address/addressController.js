@@ -32,6 +32,7 @@ exports.listAddress = async (req,res)=>{
         const response = AddressTransformer.listTransformAddressDetails(responseData, lang)
         return helper.success(res,res.__("addressListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response,{"totalCount":totalCount});
     }catch(e){
+        console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }

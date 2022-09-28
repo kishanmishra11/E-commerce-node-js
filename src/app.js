@@ -1,9 +1,11 @@
 const express = require("express");
+const app = express()
+const http = require('http').createServer(app)
+const bodyParser = require('body-parser');
 const Stripe = require('stripe');
 const cors = require('cors')
-require("./db/conn");
+const connection = require("./db/conn");
 const {PORT} = require("../config/key")
-const app = express();
 const port = PORT;
 const path = require('path');
 const publicDirectory = path.join(__dirname,"../");
@@ -14,15 +16,24 @@ const nodemailer = require("nodemailer");
 const mailer = require('./service/adminService/mailer');
 const demorouter = require("./routes/demoroute");
 
-
-
-app.listen(port, ()=>{
+http.listen(port, ()=>{
     console.log(`connection is established on port number ${PORT}`);
 })
 
+const io = require('socket.io')(http)
 
+io.on('connection', (socket) => {
+    console.log('Connected...')
+    socket.on('message', (msg) => {
+        console.log(msg)
+        socket.broadcast.emit('message', msg)
+    })
+
+})
 
 app.set('views', path.join(__dirname, 'views'));
+
+
 app.set("view engine", "ejs");
 
 app.use(express.json());
@@ -31,10 +42,14 @@ app.options('*', cors()) // include before other routes
 app.use(i18n)
 app.use(demorouter);
 app.use(express.static(publicDirectory));
-
+app.use(bodyParser.json())
 
 app.get('/views/success', (req, res) => {
     res.render('success')
+})
+
+app.get('/', (req ,res) => {
+    res.sendFile(__dirname+ '/index.html')
 })
 
 const adminRouter = require('../../api2/src/routes/admin/adminRoute');
@@ -86,3 +101,6 @@ app.use("/api/v1/subcategory",subCategoryUserRouter);
 
 const productUserRouter = require('./routes/api/v1/productRoute');
 app.use("/api/v1/product",productUserRouter);
+
+const ratingRouter = require('./routes/api/v1/ratingRoute');
+app.use("/api/v1/rating",ratingRouter);

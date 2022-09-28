@@ -1,5 +1,16 @@
 const bcrypt = require('bcrypt');
 const {loginAdmin} = require('../controller/admin/adminController');
+const {sendNotification} = require("../helper/pushNotification");
+const{
+    META_STATUS_0 = 0,
+    META_STATUS_1 = 1,
+    SUCCESSFUL = 200,
+    VALIDATION_ERROR = 400,
+    INTERNAL_SERVER_ERROR = 500,
+    ACTIVE = 1,
+    INACTIVE = 2,
+    DELETED = 3,
+} = require('../../config/key');
 
 //url link
 exports.urlInfo = (name, folderName) => {
@@ -148,5 +159,17 @@ exports.getAdminSeeder = () => {
             },
         ]
         return adminArr;
+};
 
+exports.notification = async (data) => {
+    try {
+            data2 = data;
+
+            // if (element.deviceToken) await sendNotification([element.deviceToken], data2.title, data2.body);
+    } catch (e) {
+        return e
+    }
 }
+
+
+

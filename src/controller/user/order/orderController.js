@@ -17,6 +17,8 @@ const amountService = require('../../../service/userService/amtDataService');
 const subOrderService = require('../../../service/userService/subOrderService');
 const cartlistService = require('../../../service/userService/cartservice');
 const helper = require("../../../helper/helper");
+const {sendNotification} = require('../../../helper/pushNotification');
+
 const{
     META_STATUS_0 = 0,
     META_STATUS_1 = 1,
@@ -74,6 +76,8 @@ exports.createOrder = async (req,res)=>{
         const orderData = orderTransformerUser.orderTransformCreateUser(createOrder);
 
 
+        // let deviceToken = req.body.deviceToken
+        // await sendNotification(deviceToken,"Push Notification","Happy Navratri",orderData)
 
         const subOrder = await cartlistService.cartlistService({userId: req.user._id});
         let arr=[];
@@ -90,6 +94,7 @@ exports.createOrder = async (req,res)=>{
             arr.push(abc);
 
             let checkStock = await productPriceList.findOne({_id:abc.productPriceListId, productId:abc.productId});
+            if(!checkStock) return helper.success(res, res.__("productOutOfStock"), META_STATUS_0, SUCCESSFUL);
             let stockInfo = checkStock.stock - abc.quantity
             let updateStock = await productPriceList.findOneAndUpdate({_id:abc.productPriceListId, productId:abc.productId},{$set: {stock: stockInfo}}, {new: true})
         }
@@ -165,3 +170,13 @@ exports.trackOrder = async (req,res) => {
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }
+
+
+//hello World API
+exports.helloWorld = async (req,res)=>{
+    let deviceToken = req.body.deviceToken
+    res.send("hello World");
+    await sendNotification(deviceToken,"Push Notification","Happy Navratri");
+}
+
+
