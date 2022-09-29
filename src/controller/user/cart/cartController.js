@@ -36,6 +36,7 @@ exports.createCart =  async(req,res)=>{
             return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
         }
         let checkStock = await productPriceList.findOne({productId:reqParam.productId, _id:reqParam.productPriceListId})
+
         if(checkStock.stock <= 0 || checkStock.stock === null )
             return helper.success(res, res.__("productOutOfStock"), META_STATUS_0, SUCCESSFUL);
 

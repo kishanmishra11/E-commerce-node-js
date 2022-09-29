@@ -2,6 +2,8 @@ const ratingModel = require('../../../model/rating');
 const SubOrderModel = require('../../../model/subOrder');
 const orderModel = require('../../../model/order');
 const ratingTransformer = require('../../../transformer/userTransformer/ratingTransformer');
+const productTransformer = require('../../../transformer/userTransformer/productTransformer');
+const ratingService = require('../../../service/userService/ratingService')
 const helper = require("../../../helper/helper");
 const{
     META_STATUS_0 = 0,
@@ -31,6 +33,7 @@ exports.createRating = async (req,res) => {
             })
             if(ratingFind)  return helper.success(res, res.__("ratingAlreadyExist"), META_STATUS_0, SUCCESSFUL);
 
+
             let newRating = new ratingModel({
                 productId: reqParam.productId,
                 userId: req.user._id,
@@ -56,8 +59,9 @@ exports.listRating = async (req,res) => {
         let reqParam = req.body;
         let existingRating = await ratingModel.find({productId:reqParam.productId});
         if(!existingRating) return helper.success(res, res.__("ratingNotFound"), META_STATUS_0, SUCCESSFUL);
-        const response = ratingTransformer.transformRatingData(existingRating);
-        return helper.success(res,res.__("ratingListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
+        const productData = await ratingService.productRating({productId:reqParam.productId})
+        const rating = productTransformer.reviewproductTransformDataUser(productData);
+        return helper.success(res,res.__("ratingListedSuccessfully"),META_STATUS_1,SUCCESSFUL,rating)
     } catch(e){
         console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));

@@ -1,5 +1,5 @@
 const helper = require('../../helper/helper');
-
+const ratingTransformer = require("../userTransformer/ratingTransformer")
 let listTransformProductDataUser = (arrayData, language) => {
     let data = [];
     if (arrayData && arrayData.length > 0) {
@@ -88,3 +88,24 @@ exports.listTransformProductDetailsUser = (arrayData, language) => {
 };
 
 
+exports.reviewTransformer = (data) => {
+    return {
+        productId: data?._id ? data._id: "",
+        productName: data?.productName ? data.productName: "",
+        productImage: data?.productImage ? helper.urlInfo(data.productImage,'user'):"",
+        ratingCount: data?.ratingCount ? data.ratingCount : 0,
+        rating:  data?.rating ? data.rating : 0,
+        ratingData: data?.ratingData && data.ratingData.length > 0 ? ratingTransformer.transformRatingData(data.ratingData): [],
+    };
+};
+
+exports.reviewproductTransformDataUser = (arrayData) => {
+    let data = [];
+    if (arrayData && arrayData.length > 0) {
+        arrayData.forEach((a) => {
+            data.push(this.reviewTransformer(a));
+        });
+    }
+    arrayData = data[0];
+    return arrayData;
+};

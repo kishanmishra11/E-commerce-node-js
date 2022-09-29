@@ -44,7 +44,7 @@ exports.signUp =  async(req,res)=>{
         let locals = {
             userName:req.body.userName,
             email:req.body.email,
-            phone:req.body.email
+            phone:req.body.phone
         }
         let emailBody = await ejs.renderFile(path.join(__dirname,'../../views',"home.ejs"),{locals:locals})
         mailer.sendMail(req.body.email,emailBody,"welcome to ecommerce api")

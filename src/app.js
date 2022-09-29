@@ -23,7 +23,7 @@ http.listen(port, ()=>{
 const io = require('socket.io')(http)
 
 io.on('connection', (socket) => {
-    console.log('Connected...')
+    // console.log('Connected...')
     socket.on('message', (msg) => {
         console.log(msg)
         socket.broadcast.emit('message', msg)
@@ -77,6 +77,9 @@ app.use("/admin/order",orderAdminRouter);
 const deliveryChargeRouter = require('../../api2/src/routes/admin/deliveryChargeRoute');
 app.use("/admin/deliveryCharge",deliveryChargeRouter);
 
+
+const ratingRouterAdmin = require('../../api2/src/routes/admin/ratingRoute');
+app.use("/admin/rating",ratingRouterAdmin);
 
 const cartRouter = require('../../api2/src/routes/api/v1/cartRoute');
 app.use("/api/v1/cart",cartRouter);

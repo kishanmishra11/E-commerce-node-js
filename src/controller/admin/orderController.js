@@ -5,6 +5,8 @@ const userInfo = require('../../model/users');
 const orderTransformerAdmin = require("../../transformer/adminTransformer/orderTransformer");
 const trackOrderTransformerAdmin = require("../../transformer/adminTransformer/trackOrderTransformer");
 const helper = require("../../helper/helper");
+const mailer = require("../../service/adminService/mailer");
+
 const{
     META_STATUS_0 = 0,
     META_STATUS_1 = 1,
@@ -132,6 +134,14 @@ exports.editOrderAdmin = async (req,res) => {
         let coinCount = existingUser.superCoin - 200;
 
         if (orderDetails.orderStatus === "delivered") {
+            // let locals = {
+            //     userName:req.body.userName,
+            //     email:req.body.email,
+            //     phone:req.body.phone
+            // }
+            // let emailBody = await ejs.renderFile(path.join(__dirname,'../../views',"home.ejs"),{locals:locals})
+            mailer.sendMail(existingUser.email,"Your Order Is Delivered")
+
             let coinLimit = 50;
             let coinData =  (orderDetails.finalAmount * 2) / 100;
 

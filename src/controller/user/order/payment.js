@@ -125,7 +125,7 @@ exports.payment = async (req,res)=> {
                 {price: price.id, quantity: 100},
             ],
             payment_method_types: ['card'],
-            mode: 'subscription',
+            mode: 'payment',
         }).then((session) => {
             // res.status().send("session",session.url)
             return helper.success(res,res.__("successful"),META_STATUS_1,SUCCESSFUL,session.url)
