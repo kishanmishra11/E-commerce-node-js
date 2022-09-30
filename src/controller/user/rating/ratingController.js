@@ -22,17 +22,15 @@ exports.createRating = async (req,res) => {
         let reqParam = req.body;
 
         const orderExist = await SubOrderModel.findOne({ productId: reqParam.productId, status: ACTIVE});
-        const checkOrderStatus  = await orderModel.findOne({orderId: orderExist.orderId})
+        const checkOrderStatus  = await orderModel.findOne({_id: orderExist.orderId})
         if(checkOrderStatus.orderStatus === "delivered"){
             if(!orderExist) return helper.success(res, res.__("youHaveNotPurchasedThisProduct"), META_STATUS_0, SUCCESSFUL);
-
             let ratingFind = await ratingModel.findOne({
                 userId : req.user._id,
                 productId: reqParam.productId,
                 status: {$in:[ACTIVE,INACTIVE]}
             })
             if(ratingFind)  return helper.success(res, res.__("ratingAlreadyExist"), META_STATUS_0, SUCCESSFUL);
-
 
             let newRating = new ratingModel({
                 productId: reqParam.productId,

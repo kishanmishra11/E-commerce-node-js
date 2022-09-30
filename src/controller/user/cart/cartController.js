@@ -19,6 +19,9 @@ const{
     SUCCESSFUL = 200,
     VALIDATION_ERROR = 400,
     INTERNAL_SERVER_ERROR = 500,
+    ACTIVE,
+    INACTIVE,
+    DELETED
 } = require('../../../../config/key');
 
 
@@ -36,7 +39,6 @@ exports.createCart =  async(req,res)=>{
             return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
         }
         let checkStock = await productPriceList.findOne({productId:reqParam.productId, _id:reqParam.productPriceListId})
-
         if(checkStock.stock <= 0 || checkStock.stock === null )
             return helper.success(res, res.__("productOutOfStock"), META_STATUS_0, SUCCESSFUL);
 
@@ -44,7 +46,8 @@ exports.createCart =  async(req,res)=>{
         if (req.user.userType === "prime"){
             charge.deliveryCharge = 0
         }
-        const verifyUser = await applyPromoCode.findOne({userId: req.user._id });
+
+        const verifyUser = await applyPromoCode.findOne({userId: req.user._id ,status:ACTIVE });
         let verifyPromo, promoDiscount;
         if(verifyUser) {
             verifyPromo = await promoCode.findOne({_id: verifyUser.promoCodeId});
@@ -70,7 +73,6 @@ exports.createCart =  async(req,res)=>{
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }
-
 //list cart
 exports.listCart = async (req,res)=>{
     try{

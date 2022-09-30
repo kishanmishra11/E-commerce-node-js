@@ -140,7 +140,7 @@ exports.editOrderAdmin = async (req,res) => {
             //     phone:req.body.phone
             // }
             // let emailBody = await ejs.renderFile(path.join(__dirname,'../../views',"home.ejs"),{locals:locals})
-            mailer.sendMail(existingUser.email,"Your Order Is Delivered")
+            mailer.sendMail(existingUser.email,"Order","Your order have been delivered...")
 
             let coinLimit = 50;
             let coinData =  (orderDetails.finalAmount * 2) / 100;
