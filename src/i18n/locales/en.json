@@ -115,5 +115,7 @@
 	"ratingAddedSuccessfully": "rating Added Successfully",
 	"ratingAlreadyExist": "rating Already Exist",
 	"youHaveNotPurchasedThisProduct": "you Have Not Purchased This Product",
-	"ratingListedSuccessfully": "rating Listed Successfully"
+	"ratingListedSuccessfully": "rating Listed Successfully",
+	"productAddedSuccessfullyInYourWishList": "product Added Successfully In Your Wish List",
+	"productAlreadyExistsInWishList": "product Already Exists In WishList"
 }

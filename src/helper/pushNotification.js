@@ -48,8 +48,8 @@ module.exports.sendNotification = async (registrationToken, title, body,data) =>
     };
     const message = {
         notification: {
-            title: "Push Notification",
-            body: "Happy Navratri",
+            title: title,
+            body: body,
             data:"data",
         },
         // data:{

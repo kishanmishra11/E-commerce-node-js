@@ -31,6 +31,30 @@ io.on('connection', (socket) => {
 
 })
 
+const qr = require('qrcode');
+const fs = require('fs')
+let data = `www.youtube.com`
+
+let strData = JSON.stringify(data)
+
+qr.toString(strData, {type:'terminal'},
+    function (err, code) {
+        if(err) return console.log("error occurred")
+    });
+
+qr.toDataURL(strData, function (err, code) {
+    if(err) return console.log("error occurred")
+    var base64Data = code.replace(/^data:image\/png;base64,/, "");
+    fs.writeFile("web.png", base64Data, 'base64', function(err) {
+        if(err){console.log(err);}
+    });
+})
+
+
+
+
+
+
 app.set('views', path.join(__dirname, 'views'));
 
 

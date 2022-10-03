@@ -1,4 +1,4 @@
-const ProductController = require('../../../model/product');
+const ProductModel = require('../../../model/product');
 const userModel= require('../../../model/users');
 const productTransformer = require('../../../transformer/userTransformer/productTransformer');
 const productlistService = require('../../../service/userService/productservice');
@@ -43,10 +43,11 @@ exports.viewProduct = async (req,res) => {
         let userId = req?.user?._id ? req.user._id : undefined;
         let userData = userId ? await userModel.findOne({_id: userId, status: 1}) : undefined;
         let userType = userData ? userData.userType : undefined;
-        let existingProduct = await ProductController.findOne({_id: reqParam.productId, status: {$ne: 3}});
+        let existingProduct = await ProductModel.findOne({_id: reqParam.productId, status: {$ne: 3}});
         if(!existingProduct) return helper.success(res, res.__("productNotFound"), META_STATUS_0, SUCCESSFUL);
         const product = await productlistService.productListService({userType: userType, productId:reqParam.productId });
         const response = productTransformer.productTransformCreateUser(existingProduct,product[0]);
+
         return helper.success(res,res.__("productFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
     } catch(e){
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));

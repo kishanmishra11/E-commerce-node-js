@@ -13,6 +13,8 @@ const { cartValidation } = require("../../../validation/userValidation/cartValid
 const transformAmtData = require("../../../transformer/userTransformer/amtDataTransformer");
 const amountService = require('../../../service/userService/amtDataService');
 const helper = require("../../../helper/helper");
+const {sendNotification} = require('../../../helper/pushNotification');
+
 const{
     META_STATUS_0 = 0,
     META_STATUS_1 = 1,
@@ -39,8 +41,10 @@ exports.createCart =  async(req,res)=>{
             return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
         }
         let checkStock = await productPriceList.findOne({productId:reqParam.productId, _id:reqParam.productPriceListId})
-        if(checkStock.stock <= 0 || checkStock.stock === null )
-            return helper.success(res, res.__("productOutOfStock"), META_STATUS_0, SUCCESSFUL);
+        let deviceToken = 'ePBqq9bCm1Ff8uAlAMoWlf:APA91bHrypYO0a4rjD5mEAWYo5x-I3LKq3yBHj_gUAFus6K-9-eXHtu4sYp_KJ72sA3w9AZjLIRWW333SaIJZNJilBgei4xTKmZLaRejojKd2Gkb2DKAGPU1DT3h2lOB2rAW2qldHVZa'
+        if(checkStock.stock <= 0 || checkStock.stock === null)
+        // await sendNotification(deviceToken,"Stock Related","Product Out Of Stock");
+        return helper.success(res, res.__("productOutOfStock"), META_STATUS_0, SUCCESSFUL);
 
         let charge = await deliveryCharge.findOne({userId: req.user._id });
         if (req.user.userType === "prime"){

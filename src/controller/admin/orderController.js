@@ -2,6 +2,9 @@ const jwt = require('jsonwebtoken');
 const order = require("../../model/order");
 const trackOrder = require("../../model/trackOrder");
 const userInfo = require('../../model/users');
+const subOrder = require('../../model/subOrder');
+const ejs = require('ejs');
+const path = require('path');
 const orderTransformerAdmin = require("../../transformer/adminTransformer/orderTransformer");
 const trackOrderTransformerAdmin = require("../../transformer/adminTransformer/trackOrderTransformer");
 const helper = require("../../helper/helper");
@@ -123,24 +126,31 @@ exports.editOrderAdmin = async (req,res) => {
 
             }
 
+        if(existingOrder.orderStatus === "delivered") return  helper.success(res, res.__("orderAlreadyDelivered"), 0, 200);
+
         await orderTrackData.save();
 
         const orderTrack = await trackOrder.findOne({orderId: reqParam.orderId});
 
         let orderDetails = await order.findOne({_id: reqParam.orderId, status: {$ne: 3}});
         let existingUser = await userInfo.findOne({_id: orderDetails.userId,status: {$ne: 3}});
-
+        let subOrderData = await subOrder.findOne({orderId:orderDetails._id,status: {$ne: 3}})
+        console.log("subOrderData",subOrderData.size)
 
         let coinCount = existingUser.superCoin - 200;
 
         if (orderDetails.orderStatus === "delivered") {
-            // let locals = {
-            //     userName:req.body.userName,
-            //     email:req.body.email,
-            //     phone:req.body.phone
-            // }
-            // let emailBody = await ejs.renderFile(path.join(__dirname,'../../views',"home.ejs"),{locals:locals})
-            mailer.sendMail(existingUser.email,"Order","Your order have been delivered...")
+            let locals = {
+                userName:existingUser.userName,
+                email:existingUser.email,
+                phone:existingUser.phone,
+                orderId:reqParam.orderId,
+                purchasedItem : subOrderData.length,
+                finalAmount:orderDetails.finalAmount
+            }
+
+            let emailBody = await ejs.renderFile(path.join(__dirname,'../../views',"orderDelivery.ejs"),{locals:locals})
+            mailer.sendMail(existingUser.email,emailBody ,"Thank you for choosing us... ","Order")
 
             let coinLimit = 50;
             let coinData =  (orderDetails.finalAmount * 2) / 100;
@@ -173,6 +183,7 @@ exports.editOrderAdmin = async (req,res) => {
         const response = trackOrderTransformerAdmin.transformTrackOrderDetails(orderTrack);
         return helper.success(res, res.__("orderTrackedSuccessfully"), 1, 200,response)
     }catch(e){
+        console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }
