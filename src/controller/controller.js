@@ -331,26 +331,26 @@
 // }
 
 // //Add Product
-exports.addEditProduct =  async(req,res)=>{
-    try{
-        //set language
-        const lang = req.header('language')
-        if(lang) {req.setLocale(lang)}
-        //joi validation
-        const validationMessage  = await productValidation(req.body);
-        if(validationMessage) {
-            return helper.error(res, 400, res.__(validationMessage));
-        }
-        if (req.file && req.file.filename) {req.body.productImage = req.file.filename }
-        const product = new Product(req.body);
-        const productExists = await Product.findOne({productName : req.body.productName});
-        if(productExists){ return helper.success(res,res.__("productAlreadyExists"),0,200,);}
-        let createProduct = await product.save();
-        let discount = {discountedPrice : req.body.productPrice - (req.body.productPrice * req.body.productDiscount/100)};
-        let createProduct2 = Object.assign(createProduct,discount);
-        const response = await  productTransformerAdmin.producttransformAddressDetails(createProduct2);
-        return helper.success(res,res.__("productAddedSuccessfully"),1,200,response);
-    } catch(e){
-        return helper.error(res,500,res.__("somethingWentWrong"));
-    }
-}
+// exports.addEditProduct =  async(req,res)=>{
+//     try{
+//         //set language
+//         const lang = req.header('language')
+//         if(lang) {req.setLocale(lang)}
+//         //joi validation
+//         const validationMessage  = await productValidation(req.body);
+//         if(validationMessage) {
+//             return helper.error(res, 400, res.__(validationMessage));
+//         }
+//         if (req.file && req.file.filename) {req.body.productImage = req.file.filename }
+//         const product = new Product(req.body);
+//         const productExists = await Product.findOne({productName : req.body.productName});
+//         if(productExists){ return helper.success(res,res.__("productAlreadyExists"),0,200,);}
+//         let createProduct = await product.save();
+//         let discount = {discountedPrice : req.body.productPrice - (req.body.productPrice * req.body.productDiscount/100)};
+//         let createProduct2 = Object.assign(createProduct,discount);
+//         const response = await  productTransformerAdmin.producttransformAddressDetails(createProduct2);
+//         return helper.success(res,res.__("productAddedSuccessfully"),1,200,response);
+//     } catch(e){
+//         return helper.error(res,500,res.__("somethingWentWrong"));
+//     }
+// }

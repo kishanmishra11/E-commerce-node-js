@@ -32,18 +32,6 @@ exports.listProduct = async (req,res)=>{
         const responseData = productService2 &&  productService2.data ? productService2.data : [];
         const totalCount =(productService2, productService2.totalRecords &&  productService2.totalRecords[0] &&  productService2.totalRecords[0].count);
 
-        // const startingMinutes = 10;
-        // let time = startingMinutes * 60;
-        // const countDown = document.getElementById('count');
-        // setInterval(updateCountDown,1000);
-        // function updateCountDown(){
-        //     const minutes = Math.floor(time/60);
-        //     let seconds = time % 60;
-        //     seconds = seconds < 10 ? '0' + seconds :seconds;
-        //     countDown.innerHTML = `${minutes}:${seconds}`;
-        //     time--;
-        // }
-
         const response = productTransformerAdmin.productlisttransformAddressDetails(responseData,lang)
         return helper.success(res,res.__("productListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response,{"totalCount":totalCount});
     }catch(e){

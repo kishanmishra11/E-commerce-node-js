@@ -105,6 +105,9 @@ app.use("/admin/deliveryCharge",deliveryChargeRouter);
 const ratingRouterAdmin = require('../../api2/src/routes/admin/ratingRoute');
 app.use("/admin/rating",ratingRouterAdmin);
 
+const offerRouter = require('../../api2/src/routes/admin/offerRoute');
+app.use("/admin/offer",offerRouter);
+
 const cartRouter = require('../../api2/src/routes/api/v1/cartRoute');
 app.use("/api/v1/cart",cartRouter);
 

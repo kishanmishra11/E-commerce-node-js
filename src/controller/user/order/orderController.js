@@ -114,7 +114,6 @@ exports.createOrder = async (req,res)=>{
         await orderTrack.save();
 
         const subOrderData = subOrderCreateTransformer.listTransformSubOrderDetails(arr);
-        // console.log("subOrderData",subOrderData)
         return helper.success(res,res.__("orderCreatedSuccessfully"),META_STATUS_1,SUCCESSFUL, {orderData,subOrderData});
     }
     catch(e) {

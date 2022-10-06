@@ -117,5 +117,14 @@
 	"youHaveNotPurchasedThisProduct": "you Have Not Purchased This Product",
 	"ratingListedSuccessfully": "rating Listed Successfully",
 	"productAddedSuccessfullyInYourWishList": "product Added Successfully In Your Wish List",
-	"productAlreadyExistsInWishList": "product Already Exists In WishList"
+	"productAlreadyExistsInWishList": "product Already Exists In WishList",
+	"offerNotFound": "offer Not Found",
+	"offerAddedSuccessfully": "offer Added Successfully",
+	"offerListedSuccessfully": "offer Listed Successfully",
+	"offerUpdatedSuccessfully": "offer Updated Successfully",
+	"offerDisplayedSuccessfully": "offer Displayed Successfully",
+	"ValidationRequiredtitle": "title Is Required Field",
+	"ValidationRequireddescription": "description Is Required Field",
+	"ValidationRequiredofferType": "offer Type Is Required Field",
+	"ValidationRequiredofferId": "offerId Is Required Field "
 }

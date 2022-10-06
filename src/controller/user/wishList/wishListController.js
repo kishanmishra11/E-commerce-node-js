@@ -30,17 +30,18 @@ exports.wishList =  async(req,res)=>{
         if(checkStock.stock <= 0 || checkStock.stock === null )
         return helper.success(res, res.__("productOutOfStock"), META_STATUS_0, SUCCESSFUL);
 
-        let setPriceLimit = reqParam;
-        const deviceToken = 'ePBqq9bCm1Ff8uAlAMoWlf:APA91bHrypYO0a4rjD5mEAWYo5x-I3LKq3yBHj_gUAFus6K-9-eXHtu4sYp_KJ72sA3w9AZjLIRWW333SaIJZNJilBgei4xTKmZLaRejojKd2Gkb2DKAGPU1DT3h2lOB2rAW2qldHVZa';
-        if(checkStock.price  <= setPriceLimit.setLimit)
-        await sendNotification(deviceToken,"Price Alert","Product Price Dropped");
-
-
         const wishList = new wishListModel(data);
         await wishList.save()
-        }
 
+        const deviceToken = 'ePBqq9bCm1Ff8uAlAMoWlf:APA91bHrypYO0a4rjD5mEAWYo5x-I3LKq3yBHj_gUAFus6K-9-eXHtu4sYp_KJ72sA3w9AZjLIRWW333SaIJZNJilBgei4xTKmZLaRejojKd2Gkb2DKAGPU1DT3h2lOB2rAW2qldHVZa';
+        let stock = await productPriceList.findOne({productId:data.productId, _id:data.productPriceListId})
+            console.log("stock",stock)
+        if(stock.price  < data.setPriceLimit){
+            await sendNotification(deviceToken,"Price Alert","Product price Dropped");
+        }
+        }
         const listWishList = await wishListModel.find();
+
 
         const response = WishListTransformer.listTransformWishListDetails(listWishList);
         return helper.success(res,res.__("productAddedSuccessfullyInYourWishList"),META_STATUS_1,SUCCESSFUL,response)
@@ -49,3 +50,5 @@ exports.wishList =  async(req,res)=>{
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }
+
+
