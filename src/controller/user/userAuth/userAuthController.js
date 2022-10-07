@@ -9,13 +9,17 @@ const ejs = require('ejs');
 const path = require('path');
 const {SECRET_KEY} = require('../../../../config/key');
 const secret_key = SECRET_KEY;
+const referralCodes = require('referral-codes')
 
 const{
-    META_STATUS_0 = 0,
-    META_STATUS_1 = 1,
-    SUCCESSFUL = 200,
-    VALIDATION_ERROR = 400,
-    INTERNAL_SERVER_ERROR = 500,
+    META_STATUS_0,
+    META_STATUS_1,
+    SUCCESSFUL,
+    VALIDATION_ERROR,
+    INTERNAL_SERVER_ERROR,
+    ACTIVE,
+    INACTIVE,
+    DELETED,
 } = require('../../../../config/key');
 
 
@@ -25,32 +29,52 @@ exports.signUp =  async(req,res)=>{
         //set language
         const lang = req.header('language')
         if(lang) {req.setLocale(lang)}
+
         //joi validation
         const validationMessage  = await userValidation(req.body);
         if(validationMessage) {
             return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
-        }const userName = await userInfo.findOne({userName: req.body.userName});
+        }
+        const userName = await userInfo.findOne({userName: req.body.userName});
         if(userName) return helper.success(res,res.__("userNameAlreadyExists"),META_STATUS_0,SUCCESSFUL);
+
         const userData = await userInfo.findOne({email: req.body.email});
         if(userData) return helper.success(res,res.__("emailAlreadyExists"),META_STATUS_0,SUCCESSFUL);
-        const userPhone = await userInfo.findOne({phone: req.body.phone});
-        if(userPhone) return helper.success(res,res.__("phoneAlreadyExists"),META_STATUS_0,SUCCESSFUL);
+        // const userPhone = await userInfo.findOne({phone: req.body.phone});
+        // if(userPhone) return helper.success(res,res.__("phoneAlreadyExists"),META_STATUS_0,SUCCESSFUL);
+
         //add profile picture
         if (req.file && req.file.filename) {req.body.profilePicture = req.file.filename; }
+
         //bcrypt
         req.body.password = await bcrypt.hashSync(req.body.password,10);
+
+        const referralCodeCreate = referralCodes.generate({
+            length: 6,
+            charset: referralCodes.charset('alphanumeric'),
+        }).toString();
+        req.body.referralCode = referralCodeCreate
+
+
+        let referralCode = await userInfo.findOne({referralCode:req.body.applyReferralCode})
+        if(referralCode){
+            await userInfo.updateOne({_id:referralCode._id,status:ACTIVE},{$inc:{superCoin:100}})
+            req.body.superCoin = 100
+        }
         const user = new userInfo(req.body)
         const createUser = await user.save();
+
         let locals = {
             userName:req.body.userName,
             email:req.body.email,
             phone:req.body.phone
         }
-        let emailBody = await ejs.renderFile(path.join(__dirname,'../../views',"home.ejs"),{locals:locals})
+        let emailBody = await ejs.renderFile(path.join(__dirname,'../../../views/',"home.ejs"),{locals:locals})
         mailer.sendMail(req.body.email,emailBody,"welcome to ecommerce api")
         const response = await UserTransformer.transformUserDetailsUser(createUser)
         return helper.success(res,res.__("userAddedSuccessfully"),META_STATUS_1,SUCCESSFUL,response);
     } catch(e){
+        console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }
@@ -82,6 +106,8 @@ exports.login = async (req, res) => {
                 await userInfo.findOneAndUpdate({email: reqParam.email}, {$set: {superCoin: coinCount,userType: "prime", primeExpiryDate: expireDate}}, {new: true})
             }
         }
+
+
 
         if (!existingUser) {
             return helper.error(res,VALIDATION_ERROR,res.__("pleaseEnterCorrectEmailAndPassword"))

@@ -8,11 +8,9 @@ const userSchema = new mongoose.Schema({
     },
     phone:{
         type:String,
-        unique: true,
     },
     email:{
         type:String,
-        unique : true,
         },
     password:{
         type:String,
@@ -39,8 +37,13 @@ const userSchema = new mongoose.Schema({
     primeExpiryDate:{
         type: Date,
     },
+    referralCode:{
+        type:String,
+    },
+    applyReferralCode:{
+        type:String,
+    },
 })
-
 
 const User = new mongoose.model('User', userSchema);
 

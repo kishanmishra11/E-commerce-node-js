@@ -10,6 +10,8 @@ exports.transformUser = (data) => {
         superCoin: data?.superCoin ? data.superCoin : 0,
         userType: data?.userType ? data.userType : "",
         primeExpiryDate: data?.primeExpiryDate ? data.primeExpiryDate : 0,
+        referralCode: data?.referralCode ? data.referralCode : 0,
+        applyReferralCode: data?.applyReferralCode ? data.applyReferralCode : 0,
         status: data?.status ? data.status : 0
     };
 };
