@@ -31,6 +31,9 @@ const productSchema = new mongoose.Schema({
     productImage : {
         type: String,
     },
+    viewCount:{
+        type:Number,
+    },
     status: {
         type: Number,
         default: 1,

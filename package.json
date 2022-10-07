@@ -36,6 +36,7 @@
     "nodemon": "^2.0.20",
     "path": "^0.12.7",
     "qrcode": "^1.5.1",
+    "referral-codes": "^2.0.3",
     "socket.io": "^4.5.2",
     "socket.io-client": "^4.5.0",
     "stripe": "^10.8.0",

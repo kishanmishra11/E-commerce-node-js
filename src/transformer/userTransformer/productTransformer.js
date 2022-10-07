@@ -11,6 +11,17 @@ let listTransformProductDataUser = (arrayData, language) => {
     return arrayData;
 };
 
+let listTransformOffer = (arrayData) => {
+    let data = [];
+    if (arrayData && arrayData.length > 0) {
+        arrayData.forEach((a) => {
+            data.push(this.offerListTransform(a));
+        });
+    }
+    arrayData = data;
+    return arrayData;
+};
+
 
 
 exports.productTransformUser = (data,language) => {
@@ -35,8 +46,10 @@ exports.productTransformUser = (data,language) => {
         productDiscount: data?.productDiscount ? data.productDiscount: 0,
         productImage: data?.productImage ? helper.urlInfo(data.productImage,'user'):"",
         status: data?.status ? data.status : 0,
+        viewCount:data?.viewCount ? data.viewCount : 0,
         cartQuantity:  data?.cartQuantity ? data.cartQuantity : 0,
         colorPriceData: data?.colorPrice && data.colorPrice.length > 0 ? listTransformProductDataUser(data.colorPrice): [],
+        offerData: data?.offerData && data.offerData.length > 0 ? listTransformOffer(data.offerData): [],
     };
 };
 
@@ -53,25 +66,26 @@ exports.productPriceListTransformUser =  (data) => {
     };
 };
 
-exports.productTransformCreateUser = (data,data2) => {
+exports.productTransformCreateUser = (data) => {
     return {
         productId: data?._id ? data._id: "",
         categoryId: data?.categoryId ? data.categoryId: "",
         subCategoryId: data?.subCategoryId ? data.subCategoryId: "",
         productName: data?.productName ? data.productName: "",
-        productDiscount:data2?.productDiscount ? data2.productDiscount: 0,
+        productDiscount:data?.productDiscount ? data.productDiscount: 0,
         productDescription: data?.productDescription ? data.productDescription : "",
         productImage: data?.productImage ? helper.urlInfo(data.productImage,'user'):"",
+        viewCount:data?.viewCount ? data.viewCount : 0,
         status: data?.status ? data.status : 0,
-        colorPriceData: data2?.colorPrice && data2.colorPrice.length > 0 ? listTransformProductDataUser(data2.colorPrice): [],
+        colorPriceData: data?.colorPrice && data.colorPrice.length > 0 ? listTransformProductDataUser(data.colorPrice): [],
     };
 };
 
 
-exports.productTransformDataUser = (arrayData,arrayData2) => {
+exports.productTransformDataUser = (arrayData) => {
     let addressData = null;
     if (arrayData) {
-        addressData = this.productTransformCreateUser(arrayData,arrayData2);
+        addressData = this.productTransformCreateUser(arrayData);
     }
     return addressData;
 };
@@ -108,4 +122,20 @@ exports.reviewproductTransformDataUser = (arrayData) => {
     }
     arrayData = data[0];
     return arrayData;
+};
+
+exports.offerListTransform =  (data) => {
+    return {
+        offerId: data?._id ? data._id: 0,
+        categoryId:data?.categoryId ? data.categoryId:0,
+        productId: data?.productId ? data.productId : 0,
+        title: data?.title ? data.title : 0,
+        description: data?.description ? data.description : 0,
+        amountType: data?.amountType ? data.amountType :0,
+        amount: data?.amount ? data.amount :0,
+        offerType: data?.offerType ? data.offerType : 0,
+        startDate: data?.startDate ? data.startDate :0,
+        endDate: data?.endDate ? data.endDate :0,
+        status: data?.status ? data.status : 0
+    };
 };

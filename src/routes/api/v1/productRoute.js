@@ -10,5 +10,5 @@ productUserRouter.post("/list-product",checkAuth.userAuth,controller.listProduct
 
 productUserRouter.post("/view-product",checkAuth.userAuth,controller.viewProduct);
 
-
+productUserRouter.post("/highest-view-product",checkAuth.userAuth,controller.highestViewProduct);
 module.exports = productUserRouter;

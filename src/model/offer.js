@@ -14,10 +14,11 @@ const offerSchema = new mongoose.Schema({
         description : {
             type: String,
         },
-        flatDiscountAmount:{
-            type:Number,
+        amountType:{
+            type:String,
+            enum: ["percentage", "amount"]
         },
-        specialDiscountAmount:{
+        amount:{
             type:Number,
         },
         offerType: {

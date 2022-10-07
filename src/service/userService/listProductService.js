@@ -1,16 +1,36 @@
 const product = require('../../model/product');
 let ObjectId = require("mongodb").ObjectId
+const {searching} = require("../../helper/helper");
+const{
+    META_STATUS_0,
+    META_STATUS_1,
+    SUCCESSFUL,
+    VALIDATION_ERROR,
+    INTERNAL_SERVER_ERROR,
+    ACTIVE,
+    INACTIVE,
+    DELETED,
+} = require('../../../config/key');
 
 exports.productlistService= async (data) => {
     try{
         let pipeline = [];
+        let search = data.search ? data.search : "";
 
         if (data.categoryId) {
             pipeline.push({
                 $match: {
                     categoryId: ObjectId(data.categoryId),
-                }
-            })
+                },
+            },
+                { $match:
+                        { $or:[
+                                {categoryName: { $regex: new RegExp(search,'i') } },
+                                {subCategoryName: { $regex: new RegExp(search,'i') } },
+                                {productName: { $regex: new RegExp(search,'i') } },
+                            ]
+                        }
+                })
         };
 
         if(data.subCategoryId) {
@@ -27,7 +47,7 @@ exports.productlistService= async (data) => {
                     }
                 })
             }
-        };
+        }
 
         pipeline.push(
 
@@ -78,8 +98,30 @@ exports.productlistService= async (data) => {
                     as: "cartData"
                 }
             },
+            {
+                $lookup:{
+                    from: "offer",
+                    let: {"productId": "$_id","categoryId":"$categoryId"},
+                    pipeline: [
+                        {
+                            $match:
+                                {
+                                    $expr:
+                                        {
+                                            $or:
+                                                [
+                                                    {$eq: ["$productId", "$$productId"]},
+                                                    {$eq: ["$categoryId", "$$categoryId"]},
+                                                    {$and:[{$eq:["$status", ACTIVE]},{$eq:["$offerType", "flatDiscount"]}]}
+                                                ]
+                                        }
+                                }
+                        },
+                    ],
+                    as: "offerData"
+                }
+            }
         );
-
 
         pipeline.push({
             $addFields:{
@@ -94,7 +136,6 @@ exports.productlistService= async (data) => {
                 }
             }
         });
-
 
         pipeline.push(
             {
@@ -232,8 +273,8 @@ exports.productlistService= async (data) => {
                             }
                         }
                     },
-                }
-            }
+                },
+            },
         );
 
 
@@ -264,6 +305,7 @@ exports.productlistService= async (data) => {
                     inStock:1,
                     isSmallest:1,
                     discountedPrice:1,
+                    viewCount:1,
                     colorPrice: {
                         $map: {
                             input: "$colorPrice",
@@ -292,11 +334,15 @@ exports.productlistService= async (data) => {
                             }
                         }
                     },
-
+                    offerData:"$offerData"
                 }
             },
         );
 
+        if(data.search){
+            let arr = ["categoryName","subCategoryName","productName"]
+            pipeline.push(searching(data.search,arr));
+        }
 
         const result = await product.aggregate(pipeline);
         return result;
