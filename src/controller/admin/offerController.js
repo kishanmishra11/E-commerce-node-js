@@ -34,8 +34,8 @@ exports.addEditOffer = async (req,res) => {
         offerExist.productId = reqParam.productId ? reqParam.productId : offerExist.productId;
         offerExist.title = reqParam.title ? reqParam.title : offerExist.title;
         offerExist.description = reqParam.description ? reqParam.description : offerExist.description;
-        offerExist.flatDiscountAmount = reqParam.flatDiscountAmount ? reqParam.flatDiscountAmount : offerExist.flatDiscountAmount;
-        offerExist.specialDiscountAmount = reqParam.specialDiscountAmount ? reqParam.specialDiscountAmount : offerExist.specialDiscountAmount;
+        offerExist.amountType = reqParam.amountType ? reqParam.amountType : offerExist.amountType;
+        offerExist.amount = reqParam.amount ? reqParam.amount : offerExist.amount;
         offerExist.offerType = req.body.offerType ? reqParam.offerType : offerExist.offerType;
         offerExist.startDate = req.body.startDate ? reqParam.startDate : offerExist.startDate;
         offerExist.endDate = req.body.endDate ? reqParam.endDate : offerExist.endDate;
