@@ -7,6 +7,7 @@ const productModel = require('../../../model/product');
 const productPriceList = require('../../../model/productPriceList');
 const subOrderModel = require('../../../model/subOrder');
 const orderModel = require('../../../model/order');
+const offerModel = require('../../../model/offer');
 const CartTransformer = require('../../../transformer/userTransformer/cartTransformer');
 const cartlistService = require('../../../service/userService/cartservice');
 const { cartValidation } = require("../../../validation/userValidation/cartValidation");
@@ -16,11 +17,11 @@ const helper = require("../../../helper/helper");
 const {sendNotification} = require('../../../helper/pushNotification');
 
 const{
-    META_STATUS_0 = 0,
-    META_STATUS_1 = 1,
-    SUCCESSFUL = 200,
-    VALIDATION_ERROR = 400,
-    INTERNAL_SERVER_ERROR = 500,
+    META_STATUS_0,
+    META_STATUS_1,
+    SUCCESSFUL,
+    VALIDATION_ERROR,
+    INTERNAL_SERVER_ERROR,
     ACTIVE,
     INACTIVE,
     DELETED
@@ -42,38 +43,49 @@ exports.createCart =  async(req,res)=>{
         }
         let checkStock = await productPriceList.findOne({productId:reqParam.productId, _id:reqParam.productPriceListId})
         let deviceToken = 'ePBqq9bCm1Ff8uAlAMoWlf:APA91bHrypYO0a4rjD5mEAWYo5x-I3LKq3yBHj_gUAFus6K-9-eXHtu4sYp_KJ72sA3w9AZjLIRWW333SaIJZNJilBgei4xTKmZLaRejojKd2Gkb2DKAGPU1DT3h2lOB2rAW2qldHVZa'
-        if(checkStock.stock <= 0 || checkStock.stock === null)
-        await sendNotification(deviceToken,"Stock Related","Product Out Of Stock");
+        if(checkStock.stock <= 0 || checkStock.stock === null){
+            await sendNotification(deviceToken,"Stock Related","Product Out Of Stock");
+            return helper.success(res, res.__("productOutOfStock"), META_STATUS_0, SUCCESSFUL);
+        }else {
+            let charge = await deliveryCharge.findOne({userId: req.user._id});
+            if (req.user.userType === "prime") {
+                charge.deliveryCharge = 0
+            }
 
-        return helper.success(res, res.__("productOutOfStock"), META_STATUS_0, SUCCESSFUL);
+            const verifyUser = await applyPromoCode.findOne({userId: req.user._id, status: ACTIVE});
+            let verifyPromo, promoDiscount;
+            if (verifyUser) {
+                verifyPromo = await promoCode.findOne({_id: verifyUser.promoCodeId});
+                promoDiscount = verifyPromo.promoDiscount;
+            } else promoDiscount = 0
+            if (req.user._id) {
+                req.body.userId = req.user._id
+            }
+            let update = await Cart.findOne({userId: req.body.userId, productId: req.body.productId})
 
-        let charge = await deliveryCharge.findOne({userId: req.user._id });
-        if (req.user.userType === "prime"){
-            charge.deliveryCharge = 0
+            if (update) {
+                update.quantity = req.body.quantity
+                await update.save();
+            } else {
+                const cart = new Cart(req.body);
+                update = await cart.save();
+            }
+            let product = await productModel.findOne({_id: req.body.productId})
+            const amtDataServiceData = await amountService.amtDataService({
+                userId: req.user._id,
+                promoDiscount: promoDiscount,
+                productId: req.body.productId,
+                deliveryCharge: charge.deliveryCharge,
+                userType: req.user.userType,
+                regularDiscount: product.regularDiscount,
+                totalPrimeDiscount: product.totalPrimeDiscount,
+                quantity:reqParam.quantity
+            });
+            const response = CartTransformer.transformCartDetails(update);
+            const amountData = transformAmtData.listAmtDataDetails(amtDataServiceData);
+            return helper.success(res, res.__("cartAddedSuccessfully"), META_STATUS_1, SUCCESSFUL, {response, amountData})
         }
-
-        const verifyUser = await applyPromoCode.findOne({userId: req.user._id ,status:ACTIVE });
-        let verifyPromo, promoDiscount;
-        if(verifyUser) {
-            verifyPromo = await promoCode.findOne({_id: verifyUser.promoCodeId});
-            promoDiscount = verifyPromo.promoDiscount;
-        } else promoDiscount = 0
-        if (req.user._id) {req.body.userId = req.user._id};
-        let update = await Cart.findOne({userId: req.body.userId, productId: req.body.productId})
-
-        if(update){
-            update.quantity = req.body.quantity
-            await update.save();
-        } else {
-            const cart = new Cart(req.body);
-            update = await cart.save();
-        }
-        let product = await productModel.findOne({_id:req.body.productId})
-        const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id, promoDiscount: promoDiscount,productId: req.body.productId , deliveryCharge:charge.deliveryCharge,userType: req.user.userType, regularDiscount:product.regularDiscount,totalPrimeDiscount:product.totalPrimeDiscount});
-        const response = CartTransformer.transformCartDetails(update);
-        const amountData = transformAmtData.listAmtDataDetails(amtDataServiceData);
-        return helper.success(res,res.__("cartAddedSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,amountData})
-    } catch(e){
+        } catch(e){
         console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
@@ -87,7 +99,7 @@ exports.listCart = async (req,res)=>{
         if(lang) {req.setLocale(lang)}
         let product = await productModel.find({productId:req.body.productId})
         const listCart = await cartlistService.cartlistService({userId: req.user._id,sortBy:reqParam.sortBy,sortKey:reqParam.sortKey,userType: req.user.userType});
-        const verifyUser = await applyPromoCode.findOne({userId: req.user._id });
+        const verifyUser = await applyPromoCode.findOne({userId: req.user._id ,status:ACTIVE});
         let verifyPromo, promoDiscount;
         if(verifyUser) {
             verifyPromo = await promoCode.findOne({_id: verifyUser.promoCodeId});

@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userInfo = require('../../../model/users');
 const UserTransformer = require('../../../transformer/userTransformer/userTransformer');
-const { userValidation } = require("../../../validation/adminValidation/userValidation");
+const { userValidation,changePasswordValidation } = require("../../../validation/adminValidation/userValidation");
 const helper = require("../../../helper/helper");
 const mailer = require("../../../service/adminService/mailer");
 const ejs = require('ejs');
@@ -58,8 +58,8 @@ exports.signUp =  async(req,res)=>{
 
         let referralCode = await userInfo.findOne({referralCode:req.body.applyReferralCode})
         if(referralCode){
-            await userInfo.updateOne({_id:referralCode._id,status:ACTIVE},{$inc:{superCoin:100}})
-            req.body.superCoin = 100
+            await userInfo.updateOne({_id:referralCode._id,status:ACTIVE},{$inc:{wallet:100}})
+            req.body.wallet = 100
         }
         const user = new userInfo(req.body)
         const createUser = await user.save();
@@ -108,7 +108,6 @@ exports.login = async (req, res) => {
         }
 
 
-
         if (!existingUser) {
             return helper.error(res,VALIDATION_ERROR,res.__("pleaseEnterCorrectEmailAndPassword"))
         }
@@ -131,3 +130,38 @@ exports.login = async (req, res) => {
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
     }
 }
+
+
+exports.changePassword = async (req, res) => {
+    try {
+        let reqParam = req.body;
+        // let validationMessage = await changePasswordValidation(reqParam);
+        // if(validationMessage) return helper.error(res, VALIDATION_ERROR, res.__(validationMessage));
+
+        const foundUser = await userInfo.findOne({_id: req.user._id, status: ACTIVE});
+        if (foundUser) {
+            //correct password check
+            const bcryptMatch = await bcrypt.compare(reqParam.oldPassword, foundUser.password);
+            if (bcryptMatch) {
+                //hashing new password
+                if(reqParam.newPassword === reqParam.oldPassword)
+                {
+                    return helper.success(res, res.__("oldPasswordAndNewPasswordCannotBeSame"), META_STATUS_0, VALIDATION_ERROR);
+                }
+                {
+                    const newPassword = await bcrypt.hash(reqParam.newPassword, 10);
+                    await foundUser.updateOne({password: newPassword});
+                    return helper.success(res,res.__("passwordChangedSuccessfully"),META_STATUS_1,SUCCESSFUL);
+                }
+
+            } else {
+                return helper.error(res,VALIDATION_ERROR, res.__("oldPasswordIsIncorrect"));
+            }
+        } else {
+            return helper.error(res,VALIDATION_ERROR, res.__("userNotFound"));
+        }
+    } catch (e) {
+        console.log(e)
+        return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));
+    }
+};

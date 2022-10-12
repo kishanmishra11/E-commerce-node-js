@@ -6,7 +6,8 @@ const applyPromoCode = require('../../../model/applyPromoCode');
 const promoCode = require('../../../model/promoCode');
 const Cart = require('../../../model/cart');
 const deliveryCharge = require('../../../model/config');
-const product = require('../../../model/product');
+const offerModel = require('../../../model/offer');
+const productModel = require('../../../model/product');
 const userInfo = require('../../../model/users');
 const productPriceList = require('../../../model/productPriceList');
 const subOrderTransformer = require('../../../transformer/userTransformer/subOrderTransformer');
@@ -42,7 +43,6 @@ exports.createOrder = async (req,res)=>{
         if(!checkCart){
             return helper.success(res, res.__("cartIsEmpty"), META_STATUS_0, SUCCESSFUL);
         }
-
         const verifyUser = await applyPromoCode.findOne({userId: req.user._id, status: 1 });
 
         let verifyPromo, promoDiscount;
@@ -57,9 +57,10 @@ exports.createOrder = async (req,res)=>{
         if (req.user.userType === "prime"){
             delivery.deliveryCharge = 0
         }
+        let product = await productModel.findOne({_id: checkCart.productId})
+        let offer = await offerModel.findOne({categoryId:product.categoryId})
 
         const amtDataServiceData =  await amountService.amtDataService({userId: req.user._id,promoDiscount: promoDiscount,deliveryCharge:delivery.deliveryCharge,userType: req.user.userType});
-
         let data= {
             userId: req.user._id,
             subTotal : amtDataServiceData[0].subTotal,
@@ -69,7 +70,6 @@ exports.createOrder = async (req,res)=>{
             finalAmount:amtDataServiceData[0].finalAmount,
             promoCodeId: verifyUser?.promoCodeId ? verifyUser.promoCodeId : null,
             addressId:reqParam.addressId
-
         }
         const ordering  = new order(data);
         const createOrder = await ordering.save();
@@ -79,7 +79,7 @@ exports.createOrder = async (req,res)=>{
         // let deviceToken = req.body.deviceToken
         // await sendNotification(deviceToken,"Push Notification","Happy Navratri",orderData)
 
-        const subOrder = await cartlistService.cartlistService({userId: req.user._id});
+        const subOrder = await cartlistService.cartlistService({userId: req.user._id,userType:req.user.userType});
         let arr=[];
         for(let element of subOrder){
             let subOrdering = new subOrderModel();

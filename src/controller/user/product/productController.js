@@ -1,6 +1,8 @@
 const ProductModel = require('../../../model/product');
 const userModel= require('../../../model/users');
 const viewCountModel= require('../../../model/viewCount');
+const offerModel= require('../../../model/offer');
+const productColorPriceModel= require('../../../model/productPriceList');
 
 const productTransformer = require('../../../transformer/userTransformer/productTransformer');
 const productlistService = require('../../../service/userService/productservice');
@@ -30,6 +32,13 @@ exports.listProduct = async (req,res)=>{
         let userData = userId ? await userModel.findOne({_id: userId, status: 1}) : undefined;
         let userType = userData ? userData.userType : undefined;
         const responseData = await listProductService.productlistService({userId: userId,userType: userType, categoryId:reqParam.categoryId,subCategoryId:reqParam.subCategoryId,search:reqParam.search});
+        let offerData = await offerModel.find();
+        const currentDate = Date.now();
+        const startDate = new Date(offerData.startDate).getTime();
+        const endDate = new Date(offerData.endDate).getTime() + 86399000 ;
+        if(currentDate < startDate || currentDate > endDate ){
+            return helper.success(res, res.__("offerExpired"), META_STATUS_0, SUCCESSFUL);
+        }
         const response = productTransformer.listTransformProductDetailsUser(responseData)
         return helper.success(res,res.__("productListedSuccessfully"),META_STATUS_1,SUCCESSFUL,response);
     }catch(e){
@@ -55,8 +64,11 @@ exports.viewProduct = async (req,res) => {
         if(!existingProduct) return helper.success(res, res.__("productNotFound"), META_STATUS_0, SUCCESSFUL);
         const [product] = await productlistService.productListService({userType: userType, productId:reqParam.productId });
         product.viewCount = count
+        let offerData = await offerModel.findOne({_id:reqParam.offerId,productId:reqParam.productId})
+        let productPrice = await productColorPriceModel.findOne({_id:reqParam.productPriceListId})
+        console.log("productPrice",productPrice)
         const response = productTransformer.productTransformDataUser(product);
-        return helper.success(res,res.__("productFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,response)
+        return helper.success(res,res.__("productFoundSuccessfully"),META_STATUS_1,SUCCESSFUL,{response,offerData})
     } catch(e){
         console.log(e)
         return helper.error(res,INTERNAL_SERVER_ERROR,res.__("somethingWentWrong"));

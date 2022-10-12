@@ -26,6 +26,6 @@ exports.sendMail = (email,emailBody,text,subject) => {
         text: text, // plain text body
         html: emailBody, // html body
     });
-    console.log("Message sent: %s", info.messageId);
-    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    console.log("Email sent to: %s", email);
+    // console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 }

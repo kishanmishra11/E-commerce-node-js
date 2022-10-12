@@ -17,6 +17,9 @@ const orderSchema = new mongoose.Schema({
     finalAmount:{
         type:Number,
     },
+    offerDiscount:{
+        type:Number,
+    },
     addressId : {
         type: mongoose.Schema.ObjectId,
     },
@@ -37,6 +40,7 @@ const orderSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     }
+
 
 },
     { collection: "order", timestamps: true})

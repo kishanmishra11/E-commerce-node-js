@@ -1,6 +1,5 @@
 const helper = require('../../helper/helper');
 exports.transformCart = (data) => {
-
     return {
         cartId: data?._id ? data._id: "",
         userId:data?.userId ? data.userId:"",
@@ -19,6 +18,7 @@ exports.transformCart = (data) => {
         totalPrice: data?.totalPrice ? data.totalPrice: 0,
         totalDiscount: data?.totalDiscount ? data.totalDiscount:0,
         finalPrice: data?.finalPrice ? data.finalPrice:0,
+        offer:data?.offer ? data.offer:0,
 
     };
 };

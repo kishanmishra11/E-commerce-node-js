@@ -126,5 +126,13 @@
 	"ValidationRequiredtitle": "title Is Required Field",
 	"ValidationRequireddescription": "description Is Required Field",
 	"ValidationRequiredofferType": "offer Type Is Required Field",
-	"ValidationRequiredofferId": "offerId Is Required Field "
+	"ValidationRequiredofferId": "offerId Is Required Field ",
+	"ValidationMinOfUppercaseoldPassword": "ValidationMinOfUppercaseoldPassword",
+	"SomethingWentWrong": "SomethingWentWrong",
+	"ValidationRequiredNewPassword": "new Password Is Required Field",
+	"ValidationRequiredoldPassword": "old Password Is Required Field",
+	"ValidationMinOfSpecialCharactersoldPassword": "password Must Be Contains 1 Special Character",
+	"oldPasswordIsIncorrect": "old Password Is Incorrect",
+	"oldPasswordAndNewPasswordCannotBeSame": "old Password And New Password Can not Be Same",
+	"passwordChangedSuccessfully": "password Changed Successfully"
 }

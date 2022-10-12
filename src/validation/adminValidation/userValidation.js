@@ -18,4 +18,17 @@ module.exports ={
         }
         return null;
     },
+    async changePasswordValidation(req)
+    {
+        const SignupSchema = Joi.object({
+            oldPassword: joiPassword.string().min(8).max(12).minOfSpecialCharacters(1).minOfLowercase(1).minOfUppercase(1).minOfNumeric(1).noWhiteSpaces().required(),
+            NewPassword: joiPassword.string().min(8).max(12).minOfSpecialCharacters(1).minOfLowercase(1).minOfUppercase(1).minOfNumeric(1).noWhiteSpaces().required()
+
+        }).unknown(true);
+        const { error } = SignupSchema.validate(req);
+        if (error) {
+            return helper.validationMessageKey("Validation", error);
+        }
+        return null;
+    },
 }

@@ -8,8 +8,8 @@ exports.transformOffer = (data) => {
         amountType: data?.amountType ? data.amountType :0,
         amount: data?.amount ? data.amount :0,
         offerType: data?.offerType ? data.offerType : 0,
-        startDate: data?.startDate ? data.startDate :0,
-        endDate: data?.endDate ? data.endDate :0,
+        startDate: data?.startDate ? data.startDate.getTime() :0,
+        endDate: data?.endDate ? data.endDate.getTime() :0,
         status: data?.status ? data.status : 0
     };
 };

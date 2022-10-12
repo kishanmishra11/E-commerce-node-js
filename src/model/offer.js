@@ -21,6 +21,9 @@ const offerSchema = new mongoose.Schema({
         amount:{
             type:Number,
         },
+        limit:{
+            type:Number,
+        },
         offerType: {
             type: String,
             enum: ["buyOneGetOne", "flatDiscount", "specialDiscount" ]

@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema({
     applyReferralCode:{
         type:String,
     },
+    wallet:{
+        type:Number,
+        default: 0,
+    },
 })
 
 const User = new mongoose.model('User', userSchema);
